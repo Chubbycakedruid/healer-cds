@@ -207,7 +207,14 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
     print(f"Resolving raid '{g['raid']}' ...")
     zone = pipeline.resolve_zone(client, g["raid"])
     encounters = [pipeline.resolve_encounter(zone, b) for b in bosses] if bosses else list(zone["encounters"])
-    print(f"  {len(encounters)} bosses x {', '.join(difficulties)}")
+    # bosses we have pulled most recently go first, so prog bosses never fall off the end of the budget
+    try:
+        recent = pipeline.last_pull_times(client, g["id"], zone["id"], encounters, g.get("recent_reports", 8))
+        encounters.sort(key=lambda e: -recent.get(e["id"], 0))
+    except WCLError:
+        pass
+    print(f"  {len(encounters)} bosses x {', '.join(difficulties)}; order: " + ", ".join(e["name"] for e in encounters))
+    waits_left = 2
     results: list[dict] = []
     last_comp: OurComp | None = None
     manual = _manual_comp(healers_override or g.get("healers"))
@@ -217,9 +224,12 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
         for difficulty in difficulties:
             diff = DIFFICULTY[difficulty.lower()]
             print(f"\n== {enc['name']} ({difficulty}) ==")
-            if client.points_limit and client.points_spent > 0.92 * client.points_limit:
-                print("  Warcraft Logs hourly API budget nearly used up; stopping here. Run again in an hour for the rest.")
-                break
+            if client.budget_low():
+                if waits_left and client.wait_for_budget(waits_left):
+                    waits_left -= 1
+                else:
+                    print("  Warcraft Logs hourly API budget used up; stopping here. The next run picks up the rest.")
+                    break
             try:
                 ours = pipeline.our_comp(client, g["id"], zone["id"], enc["id"], diff, g.get("recent_reports", 8), verbose)
                 if ours is not None:

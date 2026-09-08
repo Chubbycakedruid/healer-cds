@@ -159,12 +159,23 @@ def enrich_and_rank(client: WCLClient, kills: list[Kill], ours: OurComp, target_
 
 
 # ------------------------------------------------------------ fight detail
-def _boss_cast_list(client: WCLClient, code: str, fight: dict, npc_names: list[str], ability_names: dict) -> list[tuple[str, float]]:
-    """(ability, t) for casts by the named boss NPCs. begincast+cast pairs are collapsed to the begincast."""
-    if not npc_names:
-        return []
-    wanted = {n.lower() for n in npc_names}
-    actors = [a for a in client.npc_actors(code) if str(a.get("name", "")).lower() in wanted]
+def _boss_cast_list(client: WCLClient, code: str, fight: dict, npc_names: list[str], ability_names: dict,
+                    encounter_name: str = "") -> list[tuple[str, float]]:
+    """(ability, t) for casts by the boss NPCs. begincast+cast pairs are collapsed to the begincast.
+
+    With a mechanic file the NPC names come from it. Without one, the boss is guessed: enemy NPCs in the
+    fight whose name shares a word with the encounter name, else the first two enemy NPCs listed."""
+    all_npcs = client.npc_actors(code)
+    if npc_names:
+        wanted = {n.lower() for n in npc_names}
+        actors = [a for a in all_npcs if str(a.get("name", "")).lower() in wanted]
+    else:
+        in_fight = {e.get("id") for e in fight.get("enemyNPCs") or []}
+        cands = [a for a in all_npcs if a.get("id") in in_fight] or all_npcs
+        words = {w.lower().strip("',") for w in encounter_name.split() if len(w) > 3}
+        actors = [a for a in cands if any(w in str(a.get("name", "")).lower() for w in words)]
+        if not actors:
+            actors = cands[:2]
     if not actors:
         return []
     ev = client.enemy_casts(code, fight, [a["id"] for a in actors])
@@ -211,7 +222,7 @@ def load_fight_detail(client: WCLClient, kill: Kill, our_specs: list[str], verbo
     g = client.damage_taken_graph(kill.code, fight)
     kill.damage = _damage_series(g, fight)
     try:
-        kill.boss_casts = _boss_cast_list(client, kill.code, fight, npc_names or [], ability_names)
+        kill.boss_casts = _boss_cast_list(client, kill.code, fight, npc_names or [], ability_names, fight.get("name", ""))
     except Exception as e:
         if verbose:
             print(f"  (no boss casts for {kill.code}: {e})")
@@ -297,7 +308,7 @@ def our_pull_details(client: WCLClient, guild_id: int, zone_id: int, encounter_i
                               "t_in_phase": round(tp, 1) if tp is not None else None})
             boss_casts, deaths = [], []
             try:
-                boss_casts = _boss_cast_list(client, rep["code"], f, npc_names or [], names)
+                boss_casts = _boss_cast_list(client, rep["code"], f, npc_names or [], names, f.get("name", ""))
                 actor_names = {a["id"]: a["name"] for a in md.get("actors") or []}
                 for d in client.deaths(rep["code"], f):
                     deaths.append({"player": actor_names.get(d.get("targetID"), "?"),
@@ -366,3 +377,15 @@ def mythic_healer_counts(client: WCLClient, encounter_id: int, min_kills: int = 
                     "median_kill": round(st.median(ds)), "fastest": round(min(ds))} for n, ds in by_n.items()),
                   key=lambda x: -x["kills"])
     return {"kills": len(rows), "distribution": dist, "suggested": dist[0]["healers"]}
+
+
+def last_pull_times(client: WCLClient, guild_id: int, zone_id: int, encounters: list[dict],
+                    recent_reports: int) -> dict[int, float]:
+    """encounter id -> timestamp of our most recent pull of it on any difficulty (0 if never)."""
+    out = {e["id"]: 0.0 for e in encounters}
+    for rep in client.guild_reports(guild_id, zone_id, recent_reports):
+        for f in client.report_fights(rep["code"]):
+            eid = f.get("encounterID")
+            if eid in out:
+                out[eid] = max(out[eid], rep["startTime"] + f["startTime"])
+    return out

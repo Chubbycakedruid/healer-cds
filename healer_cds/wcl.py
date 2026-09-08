@@ -33,6 +33,7 @@ class WCLClient:
         self._token_expiry = 0.0
         self.points_spent = 0.0
         self.points_limit = 0
+        self.points_reset_in = 3600
         self.session = requests.Session()
         if cache_dir:
             cache_dir.mkdir(parents=True, exist_ok=True)
@@ -98,9 +99,24 @@ class WCLClient:
         if rl:
             self.points_spent = rl.get("pointsSpentThisHour", self.points_spent)
             self.points_limit = rl.get("limitPerHour", self.points_limit)
+            self.points_reset_in = rl.get("pointsResetIn", self.points_reset_in)
         if cache_key and self.cache_dir:
             (self.cache_dir / f"{cache_key}.json").write_text(json.dumps(data))
         return data
+
+    def budget_low(self, frac: float = 0.9) -> bool:
+        return bool(self.points_limit) and self.points_spent > frac * self.points_limit
+
+    def wait_for_budget(self, max_waits: int = 2) -> bool:
+        """Sleep until the hourly points reset. Returns False if we have waited too often already."""
+        if max_waits <= 0:
+            return False
+        wait = max(60, int(self.points_reset_in) + 30)
+        print(f"  Warcraft Logs hourly API budget used ({self.points_spent:.0f}/{self.points_limit}); "
+              f"waiting {wait // 60} min for it to reset ...")
+        time.sleep(wait)
+        self.points_spent = 0.0
+        return True
 
     # --------------------------------------------------------- convenience
     RL = "rateLimitData { limitPerHour pointsSpentThisHour pointsResetIn }"
@@ -126,10 +142,11 @@ class WCLClient:
             fights(encounterID:$e, difficulty:$d) {
               id encounterID name difficulty kill startTime endTime fightPercentage
               friendlyPlayers
+              enemyNPCs { id gameID }
               phaseTransitions { id startTime }
             } } }
           %s }""" % self.RL
-        key = f"fights_{code}_{encounter_id}_{difficulty}"
+        key = f"fights2_{code}_{encounter_id}_{difficulty}"
         return self.query(q, {"c": code, "e": encounter_id, "d": difficulty}, cache_key=key, fresh=fresh)["reportData"]["report"]["fights"]
 
     def player_details(self, code: str, fight_id: int) -> dict:

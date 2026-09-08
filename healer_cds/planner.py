@@ -56,11 +56,25 @@ def mechanic_timeline(kills: list[Kill], boss: dict | None, use_phases: bool,
     abs_t, support/total, magnitude (avg damage taken per kill in the window), type/cover/weight/notes
     from the boss file. Unlisted: boss casts seen in logs that the boss file does not know, by count.
     """
-    mechanics = (boss or {}).get("mechanic", [])
+    mechanics = list((boss or {}).get("mechanic", []))
     kills_with = [k for k in kills if k.boss_casts]
     n = len(kills_with)
     if not n:
         return [], []
+    if not mechanics:
+        # No mechanic file: every boss cast that shows up as damage taken in the logs becomes a mechanic.
+        # Type and cover are left to the kill evidence (apply_evidence), weight 2 so it gets planned.
+        dmg_names: Counter = Counter()
+        for k in kills_with:
+            for name, pts in k.damage_abilities.items():
+                if name.lower() not in ("melee", "total"):
+                    dmg_names[name] += sum(v for _, v in pts)
+        cast_names = {name for k in kills_with for name, _ in k.boss_casts}
+        for name, total in dmg_names.most_common(10):
+            match = next((c for c in cast_names if c.lower() == name.lower() or name.lower() in c.lower() or c.lower() in name.lower()), None)
+            if match and total > 0:
+                mechanics.append({"name": match, "type": "burst", "school": "", "cover": [], "weight": 2,
+                                  "notes": "From the logs only (no mechanic file): timing from the boss's casts, cover from what the kill healers used."})
     buckets: dict[tuple[str, int | None], list] = defaultdict(list)
     unlisted: Counter = Counter()
     for k in kills_with:
