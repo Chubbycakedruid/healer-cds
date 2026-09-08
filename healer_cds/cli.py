@@ -36,7 +36,10 @@ def load_cooldowns(path: Path) -> dict[str, list[dict]]:
 
 
 def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldowns: dict,
-                 encounter_id: int = 0, difficulty: str = "heroic", our_pulls: list[dict] | None = None) -> dict:
+                 encounter_id: int = 0, difficulty: str = "heroic", our_pulls: list[dict] | None = None,
+                 team_owned: set[tuple[str, str]] | None = None) -> dict:
+    """team_owned: (spec, ability) pairs our healers cast on ANY boss this run, so a boss we have no
+    pulls on (Mythic prog we have not started) still knows Dimimonk plays Revival, not Restoral."""
     a = cfg["analysis"]
     use_phases = analysis.phases_are_usable(kills)
     # cluster with a low floor; the dashboard applies the configured threshold and lets you drag it
@@ -53,7 +56,10 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
     for pl in our_pulls or []:
         for c in pl["casts"]:
             owned.add((c["spec"], c["ability"]))
-    # any spec our pulls did not show us falls back to what that spec cast in the kills
+    # a spec our pulls on this boss did not show us: use what that healer cast on other bosses this run,
+    # and only then fall back to what that spec cast in the kills
+    seen_specs = {sp for sp, _ in owned}
+    owned |= {(sp, ab) for sp, ab in (team_owned or set()) if sp not in seen_specs}
     seen_specs = {sp for sp, _ in owned}
     owned |= {(c.spec_key, c.ability) for k in kills for c in k.casts if c.spec_key not in seen_specs}
     # talent-choice groups (Revival vs Restoral, Yu'lon vs Chi-Ji, Wrath vs Crusader): a healer only has one,
@@ -65,7 +71,7 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
                 if c.get("exclusive"):
                     groups.setdefault((spec, c["exclusive"]), []).append(c["name"])
     drop: set[tuple[str, str]] = set()
-    our_pull_specs = {c["spec"] for pl in our_pulls or [] for c in pl["casts"]}
+    our_pull_specs = {c["spec"] for pl in our_pulls or [] for c in pl["casts"]} | {sp for sp, _ in (team_owned or set())}
     for (spec, _), names in groups.items():
         if spec not in our_specs or len(names) < 2:
             continue
@@ -243,6 +249,7 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
     print(f"  {len(encounters)} bosses x {', '.join(difficulties)}; order: " + ", ".join(e["name"] for e in encounters))
     waits_left = 2
     results: list[dict] = []
+    rerun: list[tuple] = []
     last_comp: OurComp | None = None
     manual = _manual_comp(healers_override or g.get("healers"))
     min_kills = m.get("min_kills", 4)
@@ -299,6 +306,7 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
                     our_pulls = pipeline.our_pull_details(client, g["id"], zone["id"], enc["id"], diff,
                                                           g.get("recent_reports", 8), n_cmp, verbose, npcs)
                 res = analyse_boss(enc["name"], ours, chosen, cfg, cooldowns, enc["id"], difficulty, our_pulls)
+                rerun.append((enc["name"], ours, chosen, enc["id"], difficulty, our_pulls, res))
                 if difficulty.lower() == "mythic":
                     print("  Checking Mythic healer counts ...")
                     res["mythic_healers"] = pipeline.mythic_healer_counts(client, enc["id"], g.get("mythic_min_kills", 8), verbose=verbose)
@@ -309,6 +317,15 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
         else:
             continue
         break   # budget exhausted
+    # second pass, no API calls: every boss now knows what our healers cast on any boss this run
+    team_owned = {(c["spec"], c["ability"]) for _, _, _, _, _, pulls, _ in rerun for pl in pulls or [] for c in pl["casts"]}
+    if team_owned:
+        for name, ours_, chosen, eid, difficulty, our_pulls, res in rerun:
+            fresh = analyse_boss(name, ours_, chosen, cfg, cooldowns, eid, difficulty, our_pulls, team_owned=team_owned)
+            for k in ("mythic_healers",):
+                if k in res:
+                    fresh[k] = res[k]
+            results[results.index(res)] = fresh
     return results
 
 
