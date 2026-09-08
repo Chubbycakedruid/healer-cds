@@ -108,12 +108,16 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
             c["ability_id"] = canon.get((c["spec"], c["ability"]), c["ability_id"])
         pulls_out.append({**pl, "casts": keep})
     target = statistics.median([k.duration for k in kills]) if kills else 0
-    # reference phase timings: median start of each phase id across kills
-    ph: dict[int, list[float]] = {}
-    for k in kills:
-        for pid, s in k.phases:
-            ph.setdefault(pid, []).append(s)
-    phases_ref = sorted((pid, statistics.median(v)) for pid, v in ph.items())
+    # reference phase timings for the chart: by position in the sequence (bosses can loop P1/P2),
+    # median start across the kills that reached that transition
+    seqs = [sorted(k.phases, key=lambda x: x[1]) for k in kills if k.phases]
+    phases_ref = []
+    for i in range(max((len(q) for q in seqs), default=0)):
+        have = [q[i] for q in seqs if len(q) > i]
+        if len(have) < max(2, 0.4 * len(seqs)):
+            break
+        pid = Counter(p for p, _ in have).most_common(1)[0][0]
+        phases_ref.append((pid, statistics.median(s for _, s in have)))
     overrides = (cfg.get("output") or {}).get("names") or {}
     notes = {
         "phased": build_note(listed_and_relevant, ours, name, use_phases=True, overrides=overrides),

@@ -90,6 +90,10 @@ def phases_are_usable(kills: list[Kill]) -> bool:
     with_phases = [k for k in kills if k.phases]
     if len(with_phases) < max(2, int(0.6 * len(kills))):
         return False
+    # a boss that loops its phases (Entombed Sentinels: P1, P2, P1, P2 ...) cannot be described as
+    # "P1 0:38": that would merge every P1. Such bosses get timers from pull instead.
+    if any(len(set(pid for pid, _ in k.phases)) != len(k.phases) for k in with_phases):
+        return False
     id_sets = Counter(tuple(sorted(pid for pid, _ in k.phases)) for k in with_phases)
     most_common, n = id_sets.most_common(1)[0]
     return n >= 0.6 * len(with_phases)
@@ -172,10 +176,13 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
     # cooldowns.toml says, trust the logs. 10th percentile of a player's own re-cast gaps, needing
     # several samples so one odd cast (a reset, a log artefact) cannot shrink it.
     def effective_cd(key: tuple[str, str], cd: float) -> float:
-        g = sorted(x for x in gaps.get(key, []) if x > 5)
+        g = sorted(x for x in gaps.get(key, []) if x > 10)
         if len(g) < 5:
             return cd
         p10 = g[max(0, int(len(g) * 0.1) - 1)]
+        # talents shorten cooldowns by up to about half; anything shorter is double-logged casts
+        if p10 < cd * 0.4:
+            return cd
         return round(p10) if p10 < cd * 0.95 else cd
 
     out: list[CDCluster] = []

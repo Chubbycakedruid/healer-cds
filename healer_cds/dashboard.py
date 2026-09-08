@@ -118,7 +118,8 @@ function renderTabs(){ tabs.innerHTML=''; BOSSES.forEach(n=>{ const btn=document
 function selectCurrent(){ const es=entriesFor(curBoss); const diffs=es.map(e=>(e.difficulty||'').toLowerCase());
   if(!curDiff||!diffs.includes(curDiff)) curDiff=diffs.includes('heroic')?'heroic':diffs[0];
   cur=DATA.bosses.indexOf(es.find(e=>(e.difficulty||'').toLowerCase()===curDiff)); renderTabs(); render(DATA.bosses[cur]); }
-let cur=0, who=null, nsrtMinor=false, nsrtWho=null, minSup=DATA.min_support||0.4, nsrtSource='plan', view='plan';
+let cur=0, who=null, nsrtMinor=false, nsrtWho=null, minSup=DATA.min_support||0.4, nsrtSource='consensus', view='plan';
+try{ nsrtSource=localStorage.getItem('nsrtSource')||'consensus'; }catch(e){}
 const VIEWS=[['plan','Plan'],['timeline','Timeline'],['pulls','Our pulls'],['data','Data']];
 const HELP={plan:'Each mechanic (from the boss\'s own casts in the kills) gets the cooldowns the kill healers actually used there, from whoever in our team has it free. One cooldown, one timer, whole fight. Below: the team note and each healer\'s personal NSRT note.',
  timeline:'What the matched kills\' healers pressed and when, over the average raid damage. Marker size = how many kills agree; hollow = clashes with the ability\'s own cooldown. Notes here copy the kills rather than the team plan.',
@@ -337,13 +338,13 @@ function render(b){
     ${h ? `<div class="picks">${(nsrtSource==='plan'&&(b.mechanics||[]).length ? planAbilities(b,h) : specAbilities(b,h.spec)).map(([a,m])=>`<label class="pick"><input type="checkbox" data-a="${esc(a)}" ${picked(h.spec,a,m.tier,m.tier==='planned'?true:undefined)?'checked':''}> ${esc(a)} <span class="muted">${m.tier==='discovered'?'seen in logs':m.tier==='planned'?'in plan':m.tier}</span></label>`).join('')}
       <button class="chip small" id="pickMajors">majors only</button><button class="chip small" id="pickAll">all</button>
       <label class="pick" style="margin-left:auto" title="Short cooldowns get pressed far more often than the kills agree on. With this on, every gap longer than the cooldown gets an extra use at the heaviest damage in that gap (or at a timing some kills used)."><input type="checkbox" id="fillGaps" ${fillOn?'checked':''}> use short cooldowns every time they're up</label></div>` : ''}
-    ${(b.mechanics||[]).length?`<div class="filterbar" style="margin-bottom:8px"><span class="muted">Source:</span><button class="chip small src" data-v="plan" aria-pressed="${nsrtSource==='plan'}">team plan (by mechanic)</button><button class="chip small src" data-v="consensus" aria-pressed="${nsrtSource==='consensus'}">consensus (copy the kills)</button></div>`:''}
-    ${b.use_phases?'':'<p class="muted" style="margin:0 0 8px">No phase data for this boss, so everything is under ph:1 with time from pull.</p>'}` +
+    ${(b.mechanics||[]).length?`<div class="filterbar" style="margin-bottom:8px"><span class="muted">Source:</span><button class="chip small src" data-v="consensus" aria-pressed="${nsrtSource==='consensus'}">the kills (matches the timeline)</button><button class="chip small src" data-v="plan" aria-pressed="${nsrtSource==='plan'}">team plan (by mechanic)</button></div>`:''}
+    ${b.use_phases?'':'<p class="muted" style="margin:0 0 8px">Timers are from pull under ph:1 for this boss (its phases repeat, or Warcraft Logs has no phase data for it).</p>'}` +
     (h ? noteBlock(`${esc(h.name)} · ${esc(h.spec)} <span class="muted" style="font-weight:400">(${(b.kills_with_spec||{})[h.spec]??'?'} of ${b.kills.length} kills had a ${esc(h.spec)})</span>`, buildNsrt(b,h)) : '') +
     (h && nsrtSource!=='plan' && (b.exemplars||{})[h.spec] ? planB(b,h) : '');
   main.appendChild(ns);
   ns.querySelectorAll('.nchip').forEach(c=>c.onclick=()=>{ nsrtWho=c.dataset.v; if(who && who!==nsrtWho) who=null; rerender(); });
-  ns.querySelectorAll('.src').forEach(c=>c.onclick=()=>{ nsrtSource=c.dataset.v; rerender(); });
+  ns.querySelectorAll('.src').forEach(c=>c.onclick=()=>{ nsrtSource=c.dataset.v; try{ localStorage.setItem('nsrtSource',nsrtSource); }catch(e){} rerender(); });
   if(h && ns.querySelector('#pickMajors')){
     ns.querySelectorAll('.pick input').forEach(cb=>cb.onchange=()=>{ (picks[h.spec]=picks[h.spec]||{})[cb.dataset.a]=cb.checked; savePicks(); rerender(); });
     ns.querySelector('#pickMajors').onclick=()=>{ picks[h.spec]={}; savePicks(); rerender(); };
