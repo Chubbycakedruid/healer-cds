@@ -1,0 +1,75 @@
+# Mechanic reference for Sszorak.
+
+npcs = ["Sszorak", "Altar of the Six Winds"]
+
+[[mechanic]]
+name = "Mutilate"
+phase = 0
+type = "tank"
+school = "Nature"
+cover = ["external", "throughput"]
+weight = 2
+notes = "Apex Predator combo: frontal Nature split among those hit, applies Mutilated Gash (22s DoT). Logs show it as the biggest spike, so cover the soakers."
+
+[[mechanic]]
+name = "Ravage"
+phase = 0
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 1
+notes = "Apex Predator: frontal Physical, +300% damage taken stacks on the tank."
+
+[[mechanic]]
+name = "Tempest"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Apex Predator: Nature vortices with a 30% slow."
+
+[[mechanic]]
+name = "Venomous Surge"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["sustained", "throughput"]
+weight = 2
+notes = "Heroic+: fresh venom on several players, Nature every second for 10s; Viscous Cysts burst afterwards."
+
+[[mechanic]]
+name = "Raging Crosswinds"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained", "dr"]
+weight = 2
+notes = "Raid-wide Nature over 8s then a knock with Turbulent Gusts. Plan sustained healing across it."
+
+[[mechanic]]
+name = "Howling Maelstrom"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Gales push players around and trigger Dig In (+30% damage taken by the boss). Positioning, not healing."
+
+[[mechanic]]
+name = "Ula'tek's Presence"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Environmental Nature damage every 2s all fight."
+
+[[mechanic]]
+name = "Dig In"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Boss buff during gales."

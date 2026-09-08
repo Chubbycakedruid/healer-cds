@@ -10,6 +10,7 @@ id = 821302                       # from https://www.warcraftlogs.com/guild/id/8
 raid = "The Venomous Abyss"       # zone name on Warcraft Logs (fuzzy matched)
 difficulties = ["heroic", "mythic"]   # each is analysed and shown separately
 bosses = []                       # empty = every boss in the raid; or e.g. ["The Coiled Altar", "Ula'tek"]
+skip_bosses = ["Nymrissa Wavecaller"]   # world bosses Warcraft Logs lists under the raid
 recent_reports = 8                # how many of your guild's recent reports to scan for your comp
 compare_pulls = 6                 # how many of your own recent pulls to compare against the plan (0 = skip)
 mythic_min_kills = 8              # Mythic kills needed before a healer-count suggestion is shown

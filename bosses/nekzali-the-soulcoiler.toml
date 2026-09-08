@@ -1,0 +1,111 @@
+# Mechanic reference for Nek'zali the Soulcoiler. Journal text via Warcraft Wiki. See the-coiled-altar.toml for field meanings.
+
+npcs = ["Nek'zali the Soulcoiler", "Nek'zali", "Echo of Jawae", "Restless Amani", "Latent Cultist"]
+
+[[mechanic]]
+name = "Soulcoil Rite"
+phase = 1
+type = "dot"
+school = "Shadow"
+cover = ["throughput", "sustained"]
+weight = 3
+notes = "Raid-wide Shadow hit plus a stacking 24s DoT. Heroic adds Ritual Burn (+15% damage taken, stacking). The main healing beat."
+
+[[mechanic]]
+name = "Soulcoil Ignition"
+phase = 1
+type = "dot"
+school = "Shadow"
+cover = ["dr", "sustained"]
+weight = 3
+notes = "Channel that fires Soulcoil Rite every second for 4s and spawns Anguished Echoes. Heaviest window of P1."
+
+[[mechanic]]
+name = "Essence Rend"
+phase = 1
+type = "targeted"
+school = "Shadow"
+cover = ["external", "sustained"]
+weight = 2
+notes = "Pulls several players for 5s then knocks them away, leaving a 15s Shadow DoT. Dispel spawns a Latent Cultist."
+
+[[mechanic]]
+name = "Corpse Blight"
+phase = 1
+type = "dot"
+school = "Plague"
+cover = ["sustained"]
+weight = 2
+notes = "Restless Amani stacking raid-wide plague DoT (30s) while they live."
+
+[[mechanic]]
+name = "Possession Barrage"
+phase = 1
+type = "targeted"
+school = "Shadow"
+cover = ["external"]
+weight = 1
+notes = "Spectral echoes at the primary target, damage reduced by distance."
+
+[[mechanic]]
+name = "Hollowing Strikes"
+phase = 1
+type = "tank"
+school = "Shadow"
+cover = ["external"]
+weight = 1
+notes = "Tank melee: Shadow DoT and stacking 5% reduced healing received for 15s."
+
+[[mechanic]]
+name = "Soul Transfer"
+phase = 2
+type = "burst"
+school = "Shadow"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "Intermission: Echo of Jawae channels 15s; raid-wide Shadow damage on completion if not stopped."
+
+[[mechanic]]
+name = "Hungering Pyre"
+phase = 2
+type = "targeted"
+school = "Fire"
+cover = ["throughput"]
+weight = 2
+notes = "Heroic+: Echo erupts, Fire split among players within 10 yards; Slithering Flames chase anyone not hit."
+
+[[mechanic]]
+name = "Slithering Flame"
+phase = 2
+type = "targeted"
+school = "Fire"
+cover = ["sustained", "external"]
+weight = 1
+notes = "Stacking 8s Fire DoT; on Heroic explodes into Cremation on expiry."
+
+[[mechanic]]
+name = "Cremation"
+phase = 2
+type = "targeted"
+school = "Fire"
+cover = ["throughput"]
+weight = 2
+notes = "Heroic+: Fire burst plus a 3s DoT on players nearby."
+
+[[mechanic]]
+name = "Uncoiling"
+phase = 3
+type = "dot"
+school = "Shadow"
+cover = ["sustained", "dr"]
+weight = 3
+notes = "P2: raid-wide Shadow damage every 0.85s until the boss dies. Rotate everything."
+
+[[mechanic]]
+name = "Uncoiled Rage"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Enrage state, not a healing event."

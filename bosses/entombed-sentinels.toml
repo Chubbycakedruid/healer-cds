@@ -1,0 +1,93 @@
+# Mechanic reference for Entombed Sentinels (Breath of Ula'tek and Blood of Ula'tek). Names as they appear in the logs where known.
+
+npcs = ["Breath of Ula'tek", "Blood of Ula'tek", "Vashnik the Malignant", "Helical Toxin"]
+
+[[mechanic]]
+name = "Toxic Droplets"
+phase = 0
+type = "burst"
+school = "Nature"
+cover = ["throughput", "dr"]
+weight = 3
+notes = "Droplets erupt into Noxious Blast after 16s: raid-wide Nature. Logs show the biggest damage of the fight around the second one each cycle."
+
+[[mechanic]]
+name = "Unstable Miasma"
+phase = 0
+type = "targeted"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Marked player erupts after 8s, Shadow split among nearby players, spreads Clinging Murk (stacking 6s DoT)."
+
+[[mechanic]]
+name = "Empowering Slam"
+phase = 0
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 2
+notes = "Tank hit, +15% per consecutive hit on the same target. Logs show a big spike here, so an external is worth planning."
+
+[[mechanic]]
+name = "Bloodvenom Injection"
+phase = 0
+type = "tank"
+school = "Shadow"
+cover = ["external", "sustained"]
+weight = 1
+notes = "Tank: Physical hit plus a 40s stacking Shadow DoT."
+
+[[mechanic]]
+name = "Mark of Acid"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 2
+notes = "Stacking Nature DoT on everyone within 40 yards of Breath, every 5s."
+
+[[mechanic]]
+name = "Mark of Blood"
+phase = 0
+type = "dot"
+school = "Shadow"
+cover = ["sustained"]
+weight = 2
+notes = "Stacking Shadow DoT on everyone within 40 yards of Blood, every 5s."
+
+[[mechanic]]
+name = "Blighted Blood"
+phase = 0
+type = "targeted"
+school = "Shadow"
+cover = ["sustained"]
+weight = 1
+notes = "18s Shadow DoT, dispellable; leaves a Blood Venom pool if not dispelled."
+
+[[mechanic]]
+name = "Venom Coagulation"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Contaminate adds: Nature damage to everyone every 2s until destroyed."
+
+[[mechanic]]
+name = "Vitriolic Stasis"
+phase = 0
+type = "dot"
+school = "Plague"
+cover = ["sustained", "dr"]
+weight = 3
+notes = "Transition at 100 energy: Helical Toxins infect the raid with a 28s stacking Plague DoT; 4 applications neutralise it. Sustained healing through the whole 30s."
+
+[[mechanic]]
+name = "Living Venom"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["throughput"]
+weight = 1
+notes = "Heroic+: slime returns to the golem after 4s, striking players in its path."

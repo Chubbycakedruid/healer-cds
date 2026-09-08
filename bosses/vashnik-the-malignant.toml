@@ -1,0 +1,111 @@
+# Mechanic reference for Vashnik the Malignant.
+
+npcs = ["Vashnik the Malignant", "Vashnik", "Clotting Venom", "Shrouded Venom", "Burning Venom"]
+
+[[mechanic]]
+name = "Imbibe"
+phase = 0
+type = "burst"
+school = "Nature"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "100 energy: draws from two fountains, raid-wide damage and stacking Toxic Vapor, spawns venoms. The cycle anchor; logs show the biggest damage around it."
+
+[[mechanic]]
+name = "Malignant Catalyst"
+phase = 0
+type = "burst"
+school = "Nature"
+cover = ["throughput", "dr"]
+weight = 3
+notes = "Heroic+: raid damage with targeted projectiles. Logs show it as the main recurring hit."
+
+[[mechanic]]
+name = "Malignant Burst"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained", "dr"]
+weight = 2
+notes = "When venoms reach the cavity: stacking 30s Nature DoT on the raid."
+
+[[mechanic]]
+name = "Hemo Expulsion"
+phase = 0
+type = "burst"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Raid damage from the Fountain of Blood."
+
+[[mechanic]]
+name = "Gloom Expulsion"
+phase = 0
+type = "burst"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Raid damage from the Fountain of Shadow."
+
+[[mechanic]]
+name = "Conflagrating Expulsion"
+phase = 0
+type = "burst"
+school = "Fire"
+cover = ["throughput"]
+weight = 2
+notes = "Raid damage from the Fountain of Flame."
+
+[[mechanic]]
+name = "Toxic Vapor"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Environmental stacking DoT that grows with each Imbibe."
+
+[[mechanic]]
+name = "Siphoning Infection"
+phase = 0
+type = "absorb"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Healing absorb (150) that also cuts healing received; stacking DoT. Throughput into the target."
+
+[[mechanic]]
+name = "Stygian Infection"
+phase = 0
+type = "absorb"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Healing absorb (100) with area damage bursts."
+
+[[mechanic]]
+name = "Exploding Infection"
+phase = 0
+type = "targeted"
+school = "Fire"
+cover = ["throughput"]
+weight = 2
+notes = "Fire DoT that ends in a raid-wide, proximity-based explosion."
+
+[[mechanic]]
+name = "Dripping Fangs"
+phase = 0
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 1
+notes = "Tank: increasing DoT and +100% Physical taken, stacking. Logs show it every ~28s."
+
+[[mechanic]]
+name = "Caustic Surge"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Heroic: stacking DoT from Burning Venom explosions."

@@ -1,0 +1,147 @@
+# Mechanic reference for The Lost Explorers (Mor'zahi possessing Trader Gebbo, Scrollsage Iku, First Mate Nama).
+
+npcs = ["Mor'zahi", "Trader Gebbo", "Scrollsage Iku", "First Mate Nama"]
+
+[[mechanic]]
+name = "Final Ascension"
+phase = 1
+type = "dot"
+school = "Shadow"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "Mor'zahi channels: Shadow damage every 0.5s to everyone. Deadly if it completes. Biggest raid-wide window."
+
+[[mechanic]]
+name = "Mighty Thud"
+phase = 0
+type = "targeted"
+school = "Physical"
+cover = ["throughput", "dr"]
+weight = 3
+notes = "Nama marks three players and leaps to each, Physical split among nearby players. Logs show this as the largest single hit."
+
+[[mechanic]]
+name = "Malevolent Presence"
+phase = 0
+type = "dot"
+school = "Shadow"
+cover = ["sustained"]
+weight = 2
+notes = "Raid-wide Shadow damage every 2s."
+
+[[mechanic]]
+name = "Evil Eyes"
+phase = 0
+type = "burst"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Shadow damage around statue impacts."
+
+[[mechanic]]
+name = "Cataclysmic Invocation"
+phase = 0
+type = "burst"
+school = "Fire"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "Iku: Fire to everyone when an ally is defeated, growing each cast. Plan a DR for it."
+
+[[mechanic]]
+name = "Blast Wave"
+phase = 0
+type = "burst"
+school = "Fire"
+cover = ["throughput"]
+weight = 2
+notes = "Gebbo explosion: Fire damage plus DoT."
+
+[[mechanic]]
+name = "Spreading Flames"
+phase = 0
+type = "dot"
+school = "Fire"
+cover = ["sustained"]
+weight = 1
+notes = "Large-area Fire DoT."
+
+[[mechanic]]
+name = "Frostfire Volley"
+phase = 0
+type = "targeted"
+school = "Frostfire"
+cover = ["sustained"]
+weight = 1
+notes = "Missiles applying Burning Flames or Piercing Frost DoTs; opposite element cancels."
+
+[[mechanic]]
+name = "Blink Nova"
+phase = 0
+type = "targeted"
+school = "Arcane"
+cover = ["throughput"]
+weight = 1
+notes = "Iku teleports to a target, Arcane damage stronger up close."
+
+[[mechanic]]
+name = "Icebound Flames"
+phase = 0
+type = "targeted"
+school = "Frostfire"
+cover = ["external"]
+weight = 1
+notes = "Interruptible: Frostfire damage plus DoT and slow."
+
+[[mechanic]]
+name = "Shredding Shards"
+phase = 0
+type = "tank"
+school = "Frost"
+cover = ["external"]
+weight = 1
+notes = "Tank: Frost damage with stacking vulnerability."
+
+[[mechanic]]
+name = "Smashing Shovel"
+phase = 0
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 1
+notes = "Gebbo tank hit, harder once allies are down."
+
+[[mechanic]]
+name = "Aftershock"
+phase = 0
+type = "pool"
+school = "Physical"
+cover = ["none"]
+weight = 0
+notes = "Quake zones on the ground. Avoidable."
+
+[[mechanic]]
+name = "Shell Spin"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Frontal stun cones. Positioning."
+
+[[mechanic]]
+name = "Dark Whispers"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Mind control. Not a healing event."
+
+[[mechanic]]
+name = "Mor'zahi's Command"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Re-establishes control. Not a healing event."

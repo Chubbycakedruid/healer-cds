@@ -1,0 +1,129 @@
+# Mechanic reference for The Twin Fangs (Vexhul and Ithraz). Names as they appear in the logs.
+
+npcs = ["Vexhul", "Ithraz"]
+
+[[mechanic]]
+name = "Eternal Venom"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained", "throughput"]
+weight = 3
+notes = "Stacking Nature DoT from many abilities; 9 stacks is a big hit and an 8s stun. Logs show it carrying the most damage in the fight."
+
+[[mechanic]]
+name = "Coiling Ichor"
+phase = 0
+type = "targeted"
+school = "Shadow"
+cover = ["sustained", "throughput"]
+weight = 3
+notes = "Several players take Shadow every second for 12s, contracting and leaving Congealed Gore pools. Consistently heavy in the logs."
+
+[[mechanic]]
+name = "Stir the Depths"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["dr", "sustained"]
+weight = 3
+notes = "Vexhul channels 6s: raid-wide Nature every 2s with travelling waves. Logs show externals and DR used here."
+
+[[mechanic]]
+name = "Ravenous Feast"
+phase = 0
+type = "targeted"
+school = "Physical"
+cover = ["throughput", "dr"]
+weight = 2
+notes = "Heroic+: three quick consumes, Physical split among players within 14 yards; eats Eternal Venom stacks."
+
+[[mechanic]]
+name = "Venomous Emergence"
+phase = 0
+type = "burst"
+school = "Nature"
+cover = ["throughput", "sustained"]
+weight = 2
+notes = "Surge of Nature damage as Spawns of Vexhul arrive."
+
+[[mechanic]]
+name = "Vile Flood"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["dr", "sustained"]
+weight = 3
+notes = "Vexhul 14s channel, Nature every 0.5s. Deadly; plan a DR."
+
+[[mechanic]]
+name = "Sanguine Storm"
+phase = 0
+type = "dot"
+school = "Shadow"
+cover = ["sustained"]
+weight = 2
+notes = "Heroic+: continuous gore fountain, projectiles and pools."
+
+[[mechanic]]
+name = "Caustic Deluge"
+phase = 0
+type = "tank"
+school = "Nature"
+cover = ["external"]
+weight = 1
+notes = "Vexhul tank: 5s of Nature every 0.5s, creates venom globules."
+
+[[mechanic]]
+name = "Stone Breaker"
+phase = 0
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 1
+notes = "Ithraz roars and slams: Physical to those hit (raid-wide if nobody), Fractured +33% taken."
+
+[[mechanic]]
+name = "Corrosive Spit"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Spawns of Vexhul projectiles at players."
+
+[[mechanic]]
+name = "Submerge"
+phase = 0
+type = "pool"
+school = "Nature"
+cover = ["none"]
+weight = 0
+notes = "Creates Noxious Slicks. Avoidable."
+
+[[mechanic]]
+name = "Envenomed"
+phase = 0
+type = "tank"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Tank stacking debuff, drives swaps."
+
+[[mechanic]]
+name = "Concentrated Spittle"
+phase = 0
+type = "tank"
+school = "Nature"
+cover = ["external"]
+weight = 1
+notes = "Ranged tank hit when Vexhul is out of range."
+
+[[mechanic]]
+name = "Clotted Bolt"
+phase = 0
+type = "tank"
+school = "Shadow"
+cover = ["external"]
+weight = 1
+notes = "Ranged tank hit when Ithraz is out of range."

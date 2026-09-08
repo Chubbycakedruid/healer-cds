@@ -207,6 +207,8 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
     print(f"Resolving raid '{g['raid']}' ...")
     zone = pipeline.resolve_zone(client, g["raid"])
     encounters = [pipeline.resolve_encounter(zone, b) for b in bosses] if bosses else list(zone["encounters"])
+    skip = {n.lower() for n in g.get("skip_bosses", [])}
+    encounters = [e for e in encounters if e["name"].lower() not in skip]
     # bosses we have pulled most recently go first, so prog bosses never fall off the end of the budget
     try:
         recent = pipeline.last_pull_times(client, g["id"], zone["id"], encounters, g.get("recent_reports", 8))
