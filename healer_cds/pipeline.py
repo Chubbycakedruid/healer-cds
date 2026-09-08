@@ -166,14 +166,21 @@ def _boss_cast_list(client: WCLClient, code: str, fight: dict, npc_names: list[s
     With a mechanic file the NPC names come from it. Without one, the boss is guessed: enemy NPCs in the
     fight whose name shares a word with the encounter name, else the first two enemy NPCs listed."""
     all_npcs = client.npc_actors(code)
+    in_fight = {e.get("id") for e in fight.get("enemyNPCs") or []}
+    if in_fight:
+        # only actors that took part in this pull (the RP copy of a boss outside the fight has no casts)
+        all_npcs = [a for a in all_npcs if a.get("id") in in_fight] or all_npcs
+
+    def norm(n: str) -> str:
+        return "".join(ch for ch in str(n).lower() if ch.isalnum() or ch == " ").strip()
+
     if npc_names:
-        wanted = {n.lower() for n in npc_names}
-        actors = [a for a in all_npcs if str(a.get("name", "")).lower() in wanted]
+        wanted = {norm(n) for n in npc_names}
+        actors = [a for a in all_npcs if norm(a.get("name", "")) in wanted]
     else:
-        in_fight = {e.get("id") for e in fight.get("enemyNPCs") or []}
-        cands = [a for a in all_npcs if a.get("id") in in_fight] or all_npcs
-        words = {w.lower().strip("',") for w in encounter_name.split() if len(w) > 3}
-        actors = [a for a in cands if any(w in str(a.get("name", "")).lower() for w in words)]
+        cands = all_npcs
+        words = {norm(w) for w in encounter_name.split() if len(w) > 3}
+        actors = [a for a in cands if any(w and w in norm(a.get("name", "")) for w in words)]
         if not actors:
             actors = cands[:2]
     if not actors:

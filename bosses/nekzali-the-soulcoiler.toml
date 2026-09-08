@@ -1,6 +1,6 @@
 # Mechanic reference for Nek'zali the Soulcoiler. Journal text via Warcraft Wiki. See the-coiled-altar.toml for field meanings.
 
-npcs = ["Nek'zali the Soulcoiler", "Nek'zali", "Echo of Jawae", "Restless Amani", "Latent Cultist"]
+npcs = ["Nek'zali the Soulcoiler", "Nek'zali, the Soulcoiler", "Nek'zali", "Echo of Jawae", "Restless Amani", "Latent Cultist"]
 
 [[mechanic]]
 name = "Soulcoil Rite"
