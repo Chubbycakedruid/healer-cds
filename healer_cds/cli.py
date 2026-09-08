@@ -234,7 +234,15 @@ def run_live(cfg: dict, cooldowns: dict, bosses: list[str], difficulties: list[s
                     break
             try:
                 ours = pipeline.our_comp(client, g["id"], zone["id"], enc["id"], diff, g.get("recent_reports", 8), verbose)
-                if ours is not None:
+                if manual is not None:
+                    # a fixed lineup from config wins over whatever the logs show, but we keep the pull
+                    # stats and phase data from our own pulls when we have them
+                    ours = OurComp(healers=manual.healers, pulls=ours.pulls if ours else 0,
+                                   best_pct=ours.best_pct if ours else None, phases=ours.phases if ours else [],
+                                   longest_pull=ours.longest_pull if ours else 0,
+                                   source_reports=ours.source_reports if ours else [])
+                    comp_by_diff[difficulty] = ours
+                elif ours is not None:
                     comp_by_diff[difficulty] = ours
                 else:
                     other = next((c for c in comp_by_diff.values()), None)
