@@ -44,11 +44,13 @@ Your Warcraft Logs client gets 3600 API points per hour; one boss with 12 kills 
 3. **Matching**: each kill is scored 70% on how closely its healer specs match yours (Jaccard on the multiset,
    so two resto druids vs one counts) and 30% on how close its kill time is to the target. The target is the
    median of the candidate kills unless you set `target_duration`. Top `kills_to_analyse` are kept.
-4. **Cooldown timings**: every cast by the healers in those kills whose spec is also in your team is pulled.
+4. **Cooldown length from the logs**: if the kill healers keep re-casting an ability sooner than `cooldowns.toml`
+   says (talents shorten Convoke, Revival and others), the shorter observed cooldown is used for clash checks and planning.
+5. **Cooldown timings**: every cast by the healers in those kills whose spec is also in your team is pulled.
    Casts of the abilities in `cooldowns.toml` are grouped across kills; if most kills carry phase transition
    data the grouping is done on time-since-phase-start, otherwise on time-since-pull. A group is reported
    when at least `min_support` of the kills have a cast there. Spread shows how tightly they agree.
-5. **Discovery**: abilities not in `cooldowns.toml` that healers cast rarely (a few times a kill) and
+6. **Discovery**: abilities not in `cooldowns.toml` that healers cast rarely (a few times a kill) and
    consistently are listed at the bottom of the dashboard. If one is a real cooldown (Blizzard renamed
    something, a new talent), add it to `cooldowns.toml` and it goes on the note next run.
 
@@ -81,6 +83,10 @@ personal notes can be generated from the plan (default) or from the consensus of
 - **Our last pulls vs the plan**: for each planned timing, whether our healer pressed it on time, late, early, or not at
   all, and which major cooldowns were sitting ready when we wiped. This is the section to read after a prog night.
 - **Detail slider** (top right): how many kills must agree before a timing counts.
+- **Use short cooldowns every time they're up** (tick box above the NSRT note, on by default): the kills only agree on
+  two or three Convoke / Flourish / Divine Toll timings per fight because every guild presses them at different moments.
+  With this on, any gap longer than the ability's cooldown gets an extra use at the heaviest damage in that gap (or at a
+  timing some of the kills used). These rows say "off cooldown" in the plain plan and go on every note.
 
 ## Running it every night automatically
 

@@ -69,7 +69,8 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
     # any spec our pulls did not show us falls back to what that spec cast in the kills
     seen_specs = {sp for sp, _ in owned}
     owned |= {(c.spec_key, c.ability) for k in kills for c in k.casts if c.spec_key not in seen_specs}
-    team_plan = planner.plan_team(occurrences, evidence, ours, cooldowns, canon, owned=owned)
+    cd_seen = {(c.spec_key, c.ability): c.cd for c in clusters}
+    team_plan = planner.plan_team(occurrences, evidence, ours, cooldowns, canon, owned=owned, cd_seen=cd_seen)
     listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() if isinstance(lst, list) for c in lst}
     pulls_out = []
     for pl in our_pulls or []:
@@ -103,7 +104,8 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
         "kills": [{"code": k.code, "fight_id": k.fight_id, "guild": k.guild, "region": k.region, "duration": k.duration,
                    "score": k.score, "notes": k.match_notes, "url": k.url, "healer_specs": k.healer_specs,
                    "phases": k.phases} for k in kills],
-        "clusters": [{**_cluster_dict(c), "mechanic": mech_by_cluster.get(i)} for i, c in enumerate(clusters)],
+        # discovered (unlisted) abilities stay out of the dashboard's tables and tick boxes; they are listed as text on the Data tab
+        "clusters": [{**_cluster_dict(c), "mechanic": mech_by_cluster.get(i)} for i, c in enumerate(clusters) if c.tier != "discovered"],
         "peak_mechanics": peak_mechs, "exemplars": exemplars, "our_pulls": pulls_out,
         "mechanics": occurrences, "evidence": evidence, "team_plan": team_plan, "unlisted_boss_casts": unlisted_boss,
         "boss_file": (boss_file or {}).get("_file"),

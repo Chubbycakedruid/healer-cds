@@ -21,6 +21,11 @@ ignore = [
   "Poison Cleansing Totem", "Purify Spirit", "Wind Shear",
   "Living Flame", "Dream Breath", "Spiritbloom", "Echo", "Verdant Embrace", "Obsidian Scales", "Tip the Scales",
   "Stasis (Release)", "Hover", "Cauterizing Flame", "Naturalize",
+  "Cat Form", "Bear Form", "Travel Form", "Moonkin Form", "Treant Form", "Prowl", "Dash", "Shred", "Rake", "Rip", "Ferocious Bite", "Mangle", "Thrash",
+  "Innervate", "Nature's Swiftness", "Symbol of Hope", "Spiritwalker's Grace", "Lay on Hands", "Time Dilation", "Mana Tea", "Thunder Focus Tea",
+  "Fade", "Power Infusion", "Leap of Faith", "Angelic Feather", "Mass Dispel", "Divine Steed", "Blessing of Freedom", "Blessing of Protection", "Cleanse",
+  "Spirit Link Totem (cancel)", "Earth Shield", "Water Shield", "Earthliving Weapon", "Ghost Wolf", "Ancestral Spirit", "Earthbind Totem", "Capacitor Totem", "Tremor Totem",
+  "Zen Pulse", "Chi Burst", "Tiger's Lust", "Paralysis", "Leg Sweep",
   "Lightfused Mana Potion", "Concentrated Silvermoon Health Potion", "Healthstone", "Soulcoiler Ritual Vessel",
 ]
 
@@ -60,25 +65,11 @@ tier = "major"
 kind = "personal"
 
 [["Restoration Druid"]]
-name = "Nature's Swiftness"
-cd = 60
-ids = [132158]
-tier = "minor"
-kind = "throughput"
-
-[["Restoration Druid"]]
 name = "Ironbark"
 cd = 90
 ids = [102342]
 tier = "minor"
 kind = "external"
-
-[["Restoration Druid"]]
-name = "Innervate"
-cd = 180
-ids = [29166]
-tier = "minor"
-kind = "mana"
 
 [["Discipline Priest"]]
 name = "Power Word: Barrier"
@@ -137,13 +128,6 @@ tier = "major"
 kind = "throughput"
 
 [["Holy Priest"]]
-name = "Symbol of Hope"
-cd = 180
-ids = [64901]
-tier = "minor"
-kind = "mana"
-
-[["Holy Priest"]]
 name = "Guardian Spirit"
 cd = 180
 ids = [47788]
@@ -182,13 +166,6 @@ kind = "throughput"
 name = "Blessing of Sacrifice"
 cd = 120
 ids = [6940]
-tier = "minor"
-kind = "external"
-
-[["Holy Paladin"]]
-name = "Lay on Hands"
-cd = 600
-ids = [633]
 tier = "minor"
 kind = "external"
 
@@ -249,13 +226,6 @@ tier = "major"
 kind = "throughput"
 
 [["Restoration Shaman"]]
-name = "Spiritwalker's Grace"
-cd = 120
-ids = [79206]
-tier = "minor"
-kind = "utility"
-
-[["Restoration Shaman"]]
 name = "Astral Shift"
 cd = 120
 ids = [108271]
@@ -297,9 +267,3 @@ ids = [374227]
 tier = "minor"
 kind = "dr"
 
-[["Preservation Evoker"]]
-name = "Time Dilation"
-cd = 60
-ids = [357170]
-tier = "minor"
-kind = "external"

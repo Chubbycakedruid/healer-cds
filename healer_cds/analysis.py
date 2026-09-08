@@ -167,11 +167,23 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
         g = gaps.get(key, [])
         return not g or statistics.median(g) >= 45
 
+    # Effective cooldown from the logs: talents and set bonuses shorten cooldowns (Convoke 120 -> 60,
+    # Revival with the right talent). If the kill healers repeatedly re-cast an ability sooner than
+    # cooldowns.toml says, trust the logs. 10th percentile of a player's own re-cast gaps, needing
+    # several samples so one odd cast (a reset, a log artefact) cannot shrink it.
+    def effective_cd(key: tuple[str, str], cd: float) -> float:
+        g = sorted(x for x in gaps.get(key, []) if x > 5)
+        if len(g) < 5:
+            return cd
+        p10 = g[max(0, int(len(g) * 0.1) - 1)]
+        return round(p10) if p10 < cd * 0.95 else cd
+
     out: list[CDCluster] = []
     for (spec, ability, phase), pts in buckets.items():
         if not is_real_cd((spec, ability)):
             continue
         ability_id, tier, cd = meta[(spec, ability)]
+        cd = effective_cd((spec, ability), cd)
         spec_kills = kills_with_spec.get(spec, n_kills) or n_kills
         eff_gap = max(gap, min(cd * 0.35, 45))
         for cl in _cluster_times(pts, eff_gap):

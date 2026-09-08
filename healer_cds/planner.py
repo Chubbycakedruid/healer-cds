@@ -216,7 +216,8 @@ def apply_evidence(occurrences: list[dict], evidence: list[dict], kind_threshold
 
 def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
               cooldowns: dict[str, list[dict]], canon_ids: dict[tuple[str, str], int],
-              leeway: float = 0.9, owned: set[tuple[str, str]] | None = None) -> dict:
+              leeway: float = 0.9, owned: set[tuple[str, str]] | None = None,
+              cd_seen: dict[tuple[str, str], float] | None = None) -> dict:
     """Assign the team's cooldowns to mechanic occurrences.
 
     Priority is the mechanic's weight (from the boss file) then measured damage. A weight 3 mechanic
@@ -236,7 +237,8 @@ def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
             if owned is not None and (h.spec_key, c["name"]) not in owned:
                 continue
             inst.append({"healer": h.name, "spec": h.spec_key, "ability": c["name"], "kind": kind,
-                         "cd": float(c.get("cd", 60)), "tier": c.get("tier", "major"),
+                         # the cooldown the kill logs show (talents shorten some), else the listed one
+                         "cd": float((cd_seen or {}).get((h.spec_key, c["name"]), c.get("cd", 60))), "tier": c.get("tier", "major"),
                          "ability_id": canon_ids.get((h.spec_key, c["name"]), (c.get("ids") or [0])[0]),
                          "uses": []})
 
@@ -283,7 +285,7 @@ def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
             i["uses"].append(o["abs_t"])
             picked_kinds.append(i["kind"])
             assignments.append({"occ": idx, "healer": i["healer"], "spec": i["spec"], "ability": i["ability"],
-                                "ability_id": i["ability_id"], "kind": i["kind"],
+                                "ability_id": i["ability_id"], "kind": i["kind"], "cd": i["cd"],
                                 "evidence": round(ev_map.get((i["spec"], i["ability"]), 0.0), 2)})
     # fill pass: a major that never got used is wasted, so hang it on the heaviest mechanic that can
     # still take it (max three covers on one mechanic)
@@ -302,7 +304,7 @@ def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
             covers[idx] += 1
             filled[idx] += 1
             assignments.append({"occ": idx, "healer": i["healer"], "spec": i["spec"], "ability": i["ability"],
-                                "ability_id": i["ability_id"], "kind": i["kind"], "evidence": 0.0, "fill": True})
+                                "ability_id": i["ability_id"], "kind": i["kind"], "cd": i["cd"], "evidence": 0.0, "fill": True})
             break
     # last resort: a mechanic that wanted a specific kind and got nothing takes any healing cooldown
     covered = {a["occ"] for a in assignments}
@@ -323,7 +325,7 @@ def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
             i["uses"].append(o["abs_t"])
             covered.add(idx)
             assignments.append({"occ": idx, "healer": i["healer"], "spec": i["spec"], "ability": i["ability"],
-                                "ability_id": i["ability_id"], "kind": i["kind"], "evidence": 0.0, "fallback": True})
+                                "ability_id": i["ability_id"], "kind": i["kind"], "cd": i["cd"], "evidence": 0.0, "fallback": True})
     gaps = [idx for idx, o in enumerate(occurrences) if o["weight"] >= 2 and idx not in covered]
     return {"assignments": sorted(assignments, key=lambda a: occurrences[a["occ"]]["abs_t"]), "gaps": gaps,
             "unused": [{"healer": i["healer"], "ability": i["ability"], "kind": i["kind"]} for i in inst

@@ -168,13 +168,45 @@ function feasible(b){
   return keep;
 }
 function isFeasible(b,c){ if(!b._feas || b._feasSup!==minSup){ b._feas=feasible(b); b._feasSup=minSup; } return b._feas.has(c); }
+// Short cooldowns (Convoke, Flourish, Divine Toll...) get pressed far more often than the kills agree on:
+// the timings differ from guild to guild, so consensus only keeps two or three. Fill the gaps: wherever a
+// chosen ability would sit ready for longer than its cooldown, add a use at the heaviest damage moment in that
+// window, preferring a low-agreement timing from the kills if one falls there. Rows added this way carry fill:true.
+let fillOn=true; try{ fillOn=localStorage.getItem('fillGaps')!=='0'; }catch(e){}
+function phaseAt(b,t){ const ph=b.phases_ref||[]; let cur=null; for(const [pid,start] of ph){ if(t>=start-1e-6) cur=[pid,start]; } return cur; }
+function withPhase(b,row){ const p=phaseAt(b,row.abs_median); if(b.use_phases && p){ row.phase=p[0]; row.median=row.abs_median-p[1]; } else { row.phase=null; row.median=row.abs_median; } return row; }
+function fightLength(b){ const d=b.kills.map(k=>k.duration).sort((x,y)=>x-y); return d.length ? d[Math.floor(d.length/2)] : 0; }
+function fillGaps(b, rows){
+  if(!fillOn) return rows;
+  const end=fightLength(b)-8; if(end<=0) return rows;
+  const dmg=b.damage||[]; const out=rows.slice();
+  const groups={}; rows.forEach(r=>{ (groups[r.spec+'|'+r.ability]=groups[r.spec+'|'+r.ability]||[]).push(r); });
+  for(const key in groups){
+    const g=groups[key].sort((x,y)=>x.abs_median-y.abs_median); const cd=g[0].cd||60; if(cd>180) continue;
+    const spec=g[0].spec, ability=g[0].ability;
+    const weak=b.clusters.filter(c=>c.spec===spec&&c.ability===ability&&!g.includes(c)); // low-agreement timings from the kills
+    const times=g.map(r=>r.abs_median); let guard=0;
+    for(let i=0;i<=times.length && guard<40;i++,guard++){
+      const lo=(i===0?0:times[i-1]+cd), hi=(i<times.length?times[i]-cd:end);
+      if(hi-lo<12) continue;
+      // best moment: a kill timing in the window if any, else the damage peak inside it
+      let t=null; const w=weak.filter(c=>c.abs_median>=lo&&c.abs_median<=hi).sort((x,y)=>y.support-x.support)[0];
+      if(w){ t=w.abs_median; weak.splice(weak.indexOf(w),1); } else { let best=-1; for(const [tt,v] of dmg){ if(tt>=lo+2&&tt<=hi&&v>best){ best=v; t=tt; } } }
+      if(t==null) continue;
+      const row=withPhase(b,{spec,ability,ability_id:g[0].ability_id,tier:g[0].tier,cd,abs_median:t,support:w?w.support:0,total:g[0].total,spread:0,mechanic:w?w.mechanic:null,fill:true,src:w?'kills':'damage'});
+      out.push(row); times.splice(i,0,t); i--; guard++; // re-check the window after the new use
+      if(guard>40) break;
+    }
+  }
+  return out;
+}
 function visibleClusters(b){ const cs=supported(b); if(!who) return cs; const specs=new Set(visibleHealers(b).map(h=>h.spec)); return cs.filter(c=>specs.has(c.spec)); }
 function healerNames(b){ const m={}; b.ours.healers.forEach(h=>{m[h.spec]=(m[h.spec]?m[h.spec]+'/':'')+h.name;}); return m; }
 function timeTag(b,c,phased){ return (phased && b.use_phases && c.phase!=null) ? `{time:${fmt(c.median)},p${c.phase}}` : `{time:${fmt(c.abs_median)}}`; }
 function sortKey(b,c,phased){ return (phased && b.use_phases && c.phase!=null) ? c.phase*100000+c.median : c.abs_median; }
 function buildNote(b, phased, includeMinor){
   const names=healerNames(b);
-  const rows=visibleClusters(b).filter(c=>isFeasible(b,c)&&(c.tier==='major'||(includeMinor&&c.tier==='minor'))).sort((x,y)=>sortKey(b,x,phased)-sortKey(b,y,phased));
+  const rows=fillGaps(b, visibleClusters(b).filter(c=>isFeasible(b,c)&&(c.tier==='major'||(includeMinor&&c.tier==='minor')))).sort((x,y)=>sortKey(b,x,phased)-sortKey(b,y,phased));
   const lines=[]; let last=null;
   for(const c of rows){
     const part=`${names[c.spec]||c.spec} {spell:${c.ability_id}}`;
@@ -186,9 +218,10 @@ function buildNote(b, phased, includeMinor){
 }
 function buildPlan(b){
   const names=healerNames(b);
-  return visibleClusters(b).filter(c=>isFeasible(b,c)).sort((x,y)=>sortKey(b,x,true)-sortKey(b,y,true)).map(c=>{
+  return fillGaps(b, visibleClusters(b).filter(c=>isFeasible(b,c))).sort((x,y)=>sortKey(b,x,true)-sortKey(b,y,true)).map(c=>{
     const when=(b.use_phases&&c.phase!=null)?`P${c.phase} ${fmt(c.median)}`:fmt(c.abs_median);
-    return `${when.padStart(10)}  ${(names[c.spec]||c.spec).padEnd(16)} ${c.ability}${c.tier==='major'?'':' ['+c.tier+']'}${c.mechanic?' for '+c.mechanic:''}  (${c.support}/${c.total} kills, spread ${Math.round(c.spread)}s)`;
+    const why=c.fill?(c.src==='kills'?`(off cooldown; ${c.support}/${c.total} kills used it here)`:'(off cooldown; heaviest damage in the gap)'):`(${c.support}/${c.total} kills, spread ${Math.round(c.spread)}s)`;
+    return `${when.padStart(10)}  ${(names[c.spec]||c.spec).padEnd(16)} ${c.ability}${c.tier==='major'?'':' ['+c.tier+']'}${c.mechanic?' for '+c.mechanic:''}  ${why}`;
   }).join('\n');
 }
 function planB(b,h){
@@ -203,13 +236,16 @@ function planB(b,h){
 function buildNsrtPlan(b,h){
   const diff=(b.difficulty||DATA.difficulty||'heroic'); const D=diff.charAt(0).toUpperCase()+diff.slice(1).toLowerCase();
   const out=[`EncounterID:${b.encounter_id};Difficulty:${D};Name:${b.name};`];
-  planFor(b,h.name).filter(a=>picked(h.spec,a.ability,'planned',true)).forEach(a=>{ const o=b.mechanics[a.occ]; const ph=(b.use_phases&&o.phase!=null)?o.phase:1; const t=(b.use_phases&&o.phase!=null)?o.t:o.abs_t;
-    out.push(`ph:${ph};time:${t.toFixed(1)};tag:${h.name};spellid:${a.ability_id};`); });
+  const cdOf={}; b.clusters.forEach(c=>{ if(c.spec===h.spec) cdOf[c.ability]=c.cd; });
+  const rows=planFor(b,h.name).filter(a=>picked(h.spec,a.ability,'planned',true)).map(a=>{ const o=b.mechanics[a.occ];
+    return withPhase(b,{spec:h.spec,ability:a.ability,ability_id:a.ability_id,tier:'planned',cd:cdOf[a.ability]||a.cd||60,abs_median:o.abs_t,support:0,total:o.total,spread:0}); });
+  fillGaps(b,rows).sort((x,y)=>sortKey(b,x,true)-sortKey(b,y,true)).forEach(r=>{ const ph=(b.use_phases&&r.phase!=null)?r.phase:1; const t=(b.use_phases&&r.phase!=null)?r.median:r.abs_median;
+    out.push(`ph:${ph};time:${t.toFixed(1)};tag:${h.name};spellid:${r.ability_id};`); });
   return out.join('\n');
 }
 function buildNsrt(b, h){
   if(nsrtSource==='plan' && (b.mechanics||[]).length) return buildNsrtPlan(b,h);
-  const rows=supported(b).filter(c=>c.spec===h.spec && isFeasible(b,c) && picked(h.spec,c.ability,c.tier))
+  const rows=fillGaps(b, supported(b).filter(c=>c.spec===h.spec && isFeasible(b,c) && picked(h.spec,c.ability,c.tier)))
     .sort((x,y)=>sortKey(b,x,true)-sortKey(b,y,true));
   const diff=(b.difficulty||DATA.difficulty||'heroic'); const D=diff.charAt(0).toUpperCase()+diff.slice(1).toLowerCase();
   const out=[`EncounterID:${b.encounter_id};Difficulty:${D};Name:${b.name};`];
@@ -299,7 +335,8 @@ function render(b){
     <div class="filterbar" style="margin-bottom:8px">${b.ours.healers.map(x=>`<button class="chip nchip" data-v="${esc(x.name)}" aria-pressed="${x.name===h.name}">${esc(x.name)}</button>`).join('')}
     </div>
     ${h ? `<div class="picks">${(nsrtSource==='plan'&&(b.mechanics||[]).length ? planAbilities(b,h) : specAbilities(b,h.spec)).map(([a,m])=>`<label class="pick"><input type="checkbox" data-a="${esc(a)}" ${picked(h.spec,a,m.tier,m.tier==='planned'?true:undefined)?'checked':''}> ${esc(a)} <span class="muted">${m.tier==='discovered'?'seen in logs':m.tier==='planned'?'in plan':m.tier}</span></label>`).join('')}
-      <button class="chip small" id="pickMajors">majors only</button><button class="chip small" id="pickAll">all</button></div>` : ''}
+      <button class="chip small" id="pickMajors">majors only</button><button class="chip small" id="pickAll">all</button>
+      <label class="pick" style="margin-left:auto" title="Short cooldowns get pressed far more often than the kills agree on. With this on, every gap longer than the cooldown gets an extra use at the heaviest damage in that gap (or at a timing some kills used)."><input type="checkbox" id="fillGaps" ${fillOn?'checked':''}> use short cooldowns every time they're up</label></div>` : ''}
     ${(b.mechanics||[]).length?`<div class="filterbar" style="margin-bottom:8px"><span class="muted">Source:</span><button class="chip small src" data-v="plan" aria-pressed="${nsrtSource==='plan'}">team plan (by mechanic)</button><button class="chip small src" data-v="consensus" aria-pressed="${nsrtSource==='consensus'}">consensus (copy the kills)</button></div>`:''}
     ${b.use_phases?'':'<p class="muted" style="margin:0 0 8px">No phase data for this boss, so everything is under ph:1 with time from pull.</p>'}` +
     (h ? noteBlock(`${esc(h.name)} · ${esc(h.spec)} <span class="muted" style="font-weight:400">(${(b.kills_with_spec||{})[h.spec]??'?'} of ${b.kills.length} kills had a ${esc(h.spec)})</span>`, buildNsrt(b,h)) : '') +
@@ -310,6 +347,7 @@ function render(b){
   if(h && ns.querySelector('#pickMajors')){
     ns.querySelectorAll('.pick input').forEach(cb=>cb.onchange=()=>{ (picks[h.spec]=picks[h.spec]||{})[cb.dataset.a]=cb.checked; savePicks(); rerender(); });
     ns.querySelector('#pickMajors').onclick=()=>{ picks[h.spec]={}; savePicks(); rerender(); };
+    ns.querySelector('#fillGaps').onchange=e=>{ fillOn=e.target.checked; try{ localStorage.setItem('fillGaps', fillOn?'1':'0'); }catch(err){} rerender(); };
     ns.querySelector('#pickAll').onclick=()=>{ picks[h.spec]={}; specAbilities(b,h.spec).forEach(([a])=>picks[h.spec][a]=true); planAbilities(b,h).forEach(([a])=>picks[h.spec][a]=true); savePicks(); rerender(); };
   }
 
@@ -377,7 +415,7 @@ function ourPulls(b,col){
       pulls.map(p=>`<td class="cell" style="text-align:left;white-space:normal;font-size:12px">${(p.deaths||[]).slice(0,8).map(d=>`${esc(d.player)} <span class="muted">${esc(d.by||'?')} ${fmt(d.t)}</span>`).join('<br>')||'<span class="muted">none</span>'}</td>`).join('')+'</tr></tbody></table></div>';
   }
   for(const h of hs){
-    const plan=visibleClusters(b).filter(c=>c.spec===h.spec && isFeasible(b,c) && c.tier!=='discovered' && picked(h.spec,c.ability,c.tier)).sort((x,y)=>x.abs_median-y.abs_median);
+    const plan=fillGaps(b, visibleClusters(b).filter(c=>c.spec===h.spec && isFeasible(b,c) && c.tier!=='discovered' && picked(h.spec,c.ability,c.tier))).sort((x,y)=>x.abs_median-y.abs_median);
     if(!plan.length) continue;
     html+=`<h3 style="font-size:13px;margin:14px 0 6px"><span class="dot" style="background:${col[h.spec]}"></span>${esc(h.name)} · ${esc(h.spec)}</h3><div style="overflow-x:auto"><table><thead><tr><th>Planned</th>${hdr}</tr></thead><tbody>`;
     const used=pulls.map(()=>new Set());
