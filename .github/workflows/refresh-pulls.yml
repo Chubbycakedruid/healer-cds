@@ -1,0 +1,62 @@
+name: Refresh our pulls (mid-raid)
+
+# Press "Run workflow" on this from a phone between pulls. It re-reads only OUR latest pulls
+# (a few API calls, about a minute end to end) and republishes; the kill analysis and the plan
+# from the last nightly run are left exactly as they were.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Restore last full analysis
+        uses: actions/cache/restore@v4
+        with:
+          path: out/analysis.json
+          key: analysis-never-matches
+          restore-keys: analysis-
+      - name: Restore WCL cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache
+          key: wcl-never-matches
+          restore-keys: wcl-cache-
+      - name: Refresh pulls
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          cp config.actions.toml config.toml
+          python run.py --pulls-only -v
+      - name: Save analysis
+        uses: actions/cache/save@v4
+        with:
+          path: out/analysis.json
+          key: analysis-${{ github.run_id }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+  deploy:
+    needs: refresh
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

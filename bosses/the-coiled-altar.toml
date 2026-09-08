@@ -1,0 +1,134 @@
+# Mechanic reference for The Coiled Altar (Zul'jan and Malacrass), The Venomous Abyss.
+# Sources: dungeon journal text via Warcraft Wiki, plus what the kill logs show.
+# type:   burst = one hit raid-wide | dot = raid-wide over time | absorb = healing absorb to heal through
+#         targeted = a few players | pool = avoidable ground damage | control = fear/stun/possess | tank = tank hit
+# cover:  which cooldown kinds fit: throughput, sustained, dr (damage reduction), external, none
+# weight: how much a healer cooldown is worth here, 0 to 3 (3 = must cover, 0 = ignore)
+
+npcs = ["Zul'jan", "Malacrass", "Spiteful Soulcoiler", "Zul'jan the Twinfang", "Malacrass the Usurper"]
+
+[[mechanic]]
+name = "Fangs of the Crucible"
+phase = 1
+type = "burst"
+school = "Nature"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "Raid-wide Nature hit, boss gains Twinfang Toxin stacks. Main P1 healing moment."
+
+[[mechanic]]
+name = "Toxic Deluge"
+phase = 1
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 2
+notes = "Coalesced Venom pools tick every 2s on anyone nearby. Sustained pressure, not a burst."
+
+[[mechanic]]
+name = "Guillotine"
+phase = 1
+type = "targeted"
+school = "Nature"
+cover = ["throughput"]
+weight = 2
+notes = "Split soak on a random target, needs 5+ players. Widow's Kiss/Touch eruptions. Heroic: 500% damage taken debuff for 100s on the soakers."
+
+[[mechanic]]
+name = "Sever"
+phase = 1
+type = "tank"
+school = "Physical"
+cover = ["external"]
+weight = 1
+notes = "Frontal cleave on the tank, +200% Sever damage taken for 30s, so tanks swap."
+
+[[mechanic]]
+name = "Venomfang"
+phase = 1
+type = "targeted"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Bouncing axe, Nature DoT 14s on those hit."
+
+[[mechanic]]
+name = "Dreadmarch"
+phase = 2
+type = "control"
+school = "Shadow"
+cover = ["none"]
+weight = 0
+notes = "Possessed players absorb damage and walk to the edge; breaking the shield spawns Manifestations of Dread. DPS problem, not a healing one."
+
+[[mechanic]]
+name = "Soul Sever"
+phase = 2
+type = "tank"
+school = "Shadow"
+cover = ["external"]
+weight = 1
+notes = "Frontal cone, Gravebound 16s, ejects Soul Fragments. +200% for 36s."
+
+[[mechanic]]
+name = "Eternal Nightfall"
+phase = 2
+type = "dot"
+school = "Shadow"
+cover = ["dr", "sustained"]
+weight = 3
+notes = "Channelled raid-wide Shadow damage behind a breakable Veil of Twilight. DR first, sustained healing under it."
+
+[[mechanic]]
+name = "Retaliatory Malice"
+phase = 2
+type = "dot"
+school = "Shadow"
+cover = ["sustained"]
+weight = 2
+notes = "Spiteful Soulcoiler blasts every 3s while it lives."
+
+[[mechanic]]
+name = "Wail of Terror"
+phase = 2
+type = "control"
+school = "Shadow"
+cover = ["none"]
+weight = 0
+notes = "5s fear, interruptible. Pre-HoT before it if it will land."
+
+[[mechanic]]
+name = "Gloombomb"
+phase = 2
+type = "targeted"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Heroic+: marked players explode after 5s within 15 yards, Gravebound on hit."
+
+[[mechanic]]
+name = "Defilement of the Crucible"
+phase = 3
+type = "absorb"
+school = "Shadow"
+cover = ["throughput"]
+weight = 3
+notes = "Shadow version of Fangs: healing absorb on everyone. Must be healed through, DR does nothing. Tank autos apply Corrupted Toxin."
+
+[[mechanic]]
+name = "Grim Guillotine"
+phase = 3
+type = "absorb"
+school = "Shadow"
+cover = ["throughput"]
+weight = 2
+notes = "Split soak with a healing absorb on the soakers. Death's Embrace/Whisper eruptions."
+
+[[mechanic]]
+name = "Soulbound"
+phase = 3
+type = "control"
+school = "Shadow"
+cover = ["none"]
+weight = 0
+notes = "Kill both bosses together or the survivor berserks (+500% every 5s)."

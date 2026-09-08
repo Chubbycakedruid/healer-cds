@@ -1,0 +1,147 @@
+# Mechanic reference for Ula'tek, The Venomous Abyss. See the-coiled-altar.toml for the field meanings.
+
+npcs = ["Ula'tek", "Gore Rattle", "Ravenous Doomscale", "Doomscale Warden", "Blightscale Viper", "Slithering Clutch"]
+
+[[mechanic]]
+name = "Caustic Waves"
+phase = 1
+type = "dot"
+school = "Nature"
+cover = ["sustained", "dr"]
+weight = 3
+notes = "Waves of venom across the platform, Nature damage over 10s, stacks and hatches eggs on contact."
+
+[[mechanic]]
+name = "Call of the Serpent"
+phase = 1
+type = "pool"
+school = "Nature"
+cover = ["none"]
+weight = 0
+notes = "Falling spawn, 4 yard impact zones. Avoidable."
+
+[[mechanic]]
+name = "Mother's Wrath"
+phase = 1
+type = "tank"
+school = "Nature"
+cover = ["external"]
+weight = 1
+notes = "Knockback melee, Stone Venom stacking DoT (2:20) and Hobbled slow on the tank."
+
+[[mechanic]]
+name = "Spectral Coils"
+phase = 1
+type = "burst"
+school = "Nature"
+cover = ["dr", "throughput"]
+weight = 3
+notes = "Platform-wide Nature hit, reduced by stacking. Also the intermission mechanic. Biggest single hit in the fight."
+
+[[mechanic]]
+name = "Unchecked Rage"
+phase = 1
+type = "burst"
+school = "Physical"
+cover = ["none"]
+weight = 0
+notes = "Only happens if nobody is in melee. A positioning failure, not a plan item."
+
+[[mechanic]]
+name = "Necrotic Vapors"
+phase = 1
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 2
+notes = "Raid-wide Nature DoT ticking every second."
+
+[[mechanic]]
+name = "Rage of the Shackled"
+phase = 1
+type = "dot"
+school = "Nature"
+cover = ["sustained", "dr"]
+weight = 3
+notes = "Raid-wide Nature every 5s for 20s; Venomous Heart exposed (+100% damage taken by the boss) so this is also a burn window."
+
+[[mechanic]]
+name = "Rattler Slam"
+phase = 1
+type = "burst"
+school = "Nature"
+cover = ["throughput"]
+weight = 1
+notes = "Gore Rattle raid-wide hit when it has nobody in melee."
+
+[[mechanic]]
+name = "Mephitic Thrash"
+phase = 1
+type = "targeted"
+school = "Nature"
+cover = ["external"]
+weight = 1
+notes = "Knockback with a 20s Nature DoT."
+
+[[mechanic]]
+name = "Dread Roar"
+phase = 2
+type = "control"
+school = "Nature"
+cover = ["sustained"]
+weight = 2
+notes = "Hatched Ravenous Doomscale: 20s stun on everyone plus Nature damage. Pre-HoT, nobody can cast during it."
+
+[[mechanic]]
+name = "Virulent Spit"
+phase = 2
+type = "pool"
+school = "Nature"
+cover = ["none"]
+weight = 0
+notes = "Targeted venom pools, 4 yards. Avoidable."
+
+[[mechanic]]
+name = "Grasping Fangs"
+phase = 2
+type = "targeted"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Heroic: Warden DoT every 4s and 45% slow until broken; breaking applies Blight Vein 8s DoT."
+
+[[mechanic]]
+name = "Circling Prey"
+phase = 3
+type = "burst"
+school = "Nature"
+cover = ["dr", "throughput"]
+weight = 2
+notes = "Platform destruction, knockback and Nature damage within 13 yards."
+
+[[mechanic]]
+name = "Acidic Burst"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["external", "sustained"]
+weight = 1
+notes = "Blightscale Viper targeted 18s Nature DoT. Any phase the vipers are up."
+
+[[mechanic]]
+name = "Petrifying Sting"
+phase = 0
+type = "absorb"
+school = "Nature"
+cover = ["throughput"]
+weight = 2
+notes = "Heroic+: 10 yard stone zone, absorbs healing on those inside, Nature DoT. Heal through the absorb."
+
+[[mechanic]]
+name = "Putrid Membrane"
+phase = 0
+type = "dot"
+school = "Nature"
+cover = ["sustained"]
+weight = 2
+notes = "Egg hatch on venom contact: raid-wide Nature DoT 10s. Happens when eggs are mishandled."

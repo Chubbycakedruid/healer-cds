@@ -1,0 +1,290 @@
+# Major healer cooldowns tracked per spec.
+# Keys are "<Spec> <Class>" exactly as Warcraft Logs names them.
+# Each entry: name = spell name as it appears in logs, cd = cooldown in seconds,
+# ids = known spell IDs (optional, matching falls back to name), tier = "major" or "minor".
+# Minor cooldowns are analysed but not put on the raid note by default.
+# kind = what the cooldown is for, used by the team coverage planner:
+#   throughput = big burst of healing | sustained = healing over 10s+ (HoTs, forms, celestials)
+#   dr = raid-wide damage reduction or equalising | external = single target save
+#   personal = only saves the caster | mana | utility. Only throughput/sustained/dr/external get planned.
+# If Blizzard renames or re-IDs something, fix the name here or let discover_unlisted find it.
+
+[["Restoration Druid"]]
+name = "Tranquility"
+cd = 180
+ids = [740]
+tier = "major"
+kind = "throughput"
+
+[["Restoration Druid"]]
+name = "Convoke the Spirits"
+cd = 60
+ids = [391528]
+tier = "major"
+kind = "throughput"
+
+[["Restoration Druid"]]
+name = "Incarnation: Tree of Life"
+cd = 180
+ids = [33891]
+tier = "major"
+kind = "sustained"
+
+[["Restoration Druid"]]
+name = "Flourish"
+cd = 60
+ids = [197721]
+tier = "major"
+kind = "throughput"
+
+[["Restoration Druid"]]
+name = "Barkskin"
+cd = 60
+ids = [22812]
+tier = "major"
+kind = "personal"
+
+[["Restoration Druid"]]
+name = "Nature's Swiftness"
+cd = 60
+ids = [132158]
+tier = "minor"
+kind = "throughput"
+
+[["Restoration Druid"]]
+name = "Ironbark"
+cd = 90
+ids = [102342]
+tier = "minor"
+kind = "external"
+
+[["Restoration Druid"]]
+name = "Innervate"
+cd = 180
+ids = [29166]
+tier = "minor"
+kind = "mana"
+
+[["Discipline Priest"]]
+name = "Power Word: Barrier"
+cd = 180
+ids = [62618]
+tier = "major"
+kind = "dr"
+
+[["Discipline Priest"]]
+name = "Rapture"
+cd = 90
+ids = [47536]
+tier = "major"
+kind = "dr"
+
+[["Discipline Priest"]]
+name = "Evangelism"
+cd = 90
+ids = [246287, 472433]
+tier = "major"
+kind = "throughput"
+
+[["Discipline Priest"]]
+name = "Ultimate Penitence"
+cd = 240
+ids = [421453]
+tier = "major"
+kind = "throughput"
+
+[["Discipline Priest"]]
+name = "Pain Suppression"
+cd = 180
+ids = [33206]
+tier = "minor"
+kind = "external"
+
+[["Holy Priest"]]
+name = "Divine Hymn"
+cd = 180
+ids = [64843]
+tier = "major"
+kind = "throughput"
+
+[["Holy Priest"]]
+name = "Apotheosis"
+cd = 120
+ids = [200183]
+tier = "major"
+kind = "throughput"
+
+[["Holy Priest"]]
+name = "Holy Word: Salvation"
+cd = 720
+ids = [265202]
+tier = "major"
+kind = "throughput"
+
+[["Holy Priest"]]
+name = "Symbol of Hope"
+cd = 180
+ids = [64901]
+tier = "minor"
+kind = "mana"
+
+[["Holy Priest"]]
+name = "Guardian Spirit"
+cd = 180
+ids = [47788]
+tier = "minor"
+kind = "external"
+
+[["Holy Paladin"]]
+name = "Aura Mastery"
+cd = 180
+ids = [31821]
+tier = "major"
+kind = "dr"
+
+[["Holy Paladin"]]
+name = "Avenging Wrath"
+cd = 120
+ids = [31884]
+tier = "major"
+kind = "throughput"
+
+[["Holy Paladin"]]
+name = "Avenging Crusader"
+cd = 60
+ids = [216331]
+tier = "major"
+kind = "throughput"
+
+[["Holy Paladin"]]
+name = "Divine Toll"
+cd = 60
+ids = [375576]
+tier = "minor"
+kind = "throughput"
+
+[["Holy Paladin"]]
+name = "Blessing of Sacrifice"
+cd = 120
+ids = [6940]
+tier = "minor"
+kind = "external"
+
+[["Holy Paladin"]]
+name = "Lay on Hands"
+cd = 600
+ids = [633]
+tier = "minor"
+kind = "external"
+
+[["Mistweaver Monk"]]
+name = "Revival"
+cd = 180
+ids = [115310]
+tier = "major"
+kind = "throughput"
+
+[["Mistweaver Monk"]]
+name = "Restoral"
+cd = 180
+ids = [388615]
+tier = "major"
+kind = "throughput"
+
+[["Mistweaver Monk"]]
+name = "Invoke Yu'lon, the Jade Serpent"
+cd = 120
+ids = [322118]
+tier = "major"
+kind = "sustained"
+
+[["Mistweaver Monk"]]
+name = "Invoke Chi-Ji, the Red Crane"
+cd = 120
+ids = [325197]
+tier = "major"
+kind = "sustained"
+
+[["Mistweaver Monk"]]
+name = "Celestial Conduit"
+cd = 90
+ids = [443028]
+tier = "major"
+kind = "throughput"
+
+[["Mistweaver Monk"]]
+name = "Life Cocoon"
+cd = 120
+ids = [116849]
+tier = "minor"
+kind = "external"
+
+[["Restoration Shaman"]]
+name = "Spirit Link Totem"
+cd = 180
+ids = [98008]
+tier = "major"
+kind = "dr"
+
+[["Restoration Shaman"]]
+name = "Ascendance"
+cd = 180
+ids = [114052]
+tier = "major"
+kind = "throughput"
+
+[["Restoration Shaman"]]
+name = "Spiritwalker's Grace"
+cd = 120
+ids = [79206]
+tier = "minor"
+kind = "utility"
+
+[["Restoration Shaman"]]
+name = "Astral Shift"
+cd = 120
+ids = [108271]
+tier = "minor"
+kind = "personal"
+
+[["Preservation Evoker"]]
+name = "Rewind"
+cd = 240
+ids = [363534]
+tier = "major"
+kind = "throughput"
+
+[["Preservation Evoker"]]
+name = "Dream Flight"
+cd = 120
+ids = [359816]
+tier = "major"
+kind = "throughput"
+
+[["Preservation Evoker"]]
+name = "Emerald Communion"
+cd = 180
+ids = [370960]
+tier = "major"
+kind = "sustained"
+
+[["Preservation Evoker"]]
+name = "Stasis"
+cd = 90
+ids = [370537]
+tier = "major"
+kind = "throughput"
+
+[["Preservation Evoker"]]
+name = "Zephyr"
+cd = 120
+ids = [374227]
+tier = "minor"
+kind = "dr"
+
+[["Preservation Evoker"]]
+name = "Time Dilation"
+cd = 60
+ids = [357170]
+tier = "minor"
+kind = "external"

@@ -1,0 +1,69 @@
+name: Nightly full analysis
+
+on:
+  schedule:
+    - cron: "30 3 * * *"      # 03:30 UTC every day (04:30 UK summer time, 03:30 winter)
+  workflow_dispatch:           # and a "Run workflow" button for a manual full run
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      # Warcraft Logs responses for finished reports never change, so keep them between runs.
+      # This is what keeps the nightly run inside the hourly API budget.
+      - name: Restore WCL cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache
+          key: wcl-cache-${{ github.run_id }}
+          restore-keys: wcl-cache-
+
+      - name: Run the full analysis
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          cp config.actions.toml config.toml
+          python run.py -v
+
+      - name: Save WCL cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .cache
+          key: wcl-cache-${{ github.run_id }}
+
+      # The last full analysis, so the mid-raid "refresh pulls" workflow has something to update.
+      - name: Save analysis
+        uses: actions/cache/save@v4
+        with:
+          path: out/analysis.json
+          key: analysis-${{ github.run_id }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+  deploy:
+    needs: analyse
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

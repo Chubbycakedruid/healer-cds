@@ -1,0 +1,45 @@
+# Config used by the GitHub Actions workflows. Credentials come from the repository secrets
+# WCL_CLIENT_ID and WCL_CLIENT_SECRET, never from this file. Everything else is editable here.
+[wcl]
+client_id = "FROM_ENV"
+client_secret = "FROM_ENV"
+
+[guild]
+id = 821302                       # from https://www.warcraftlogs.com/guild/id/821302
+raid = "The Venomous Abyss"       # zone name on Warcraft Logs (fuzzy matched)
+difficulties = ["heroic", "mythic"]   # each is analysed and shown separately
+bosses = []                       # empty = every boss in the raid; or e.g. ["The Coiled Altar", "Ula'tek"]
+recent_reports = 8                # how many of your guild's recent reports to scan for your comp
+compare_pulls = 6                 # how many of your own recent pulls to compare against the plan (0 = skip)
+mythic_min_kills = 8              # Mythic kills needed before a healer-count suggestion is shown
+
+[matching]
+# How many top-parse kills to pull per healer spec in your team (each is 1 to 3 API calls).
+candidates_per_spec = 25
+# How many best-matching kills to actually analyse per boss.
+kills_to_analyse = 12
+# Weights for the match score (0 to 1). Healer comp is Jaccard similarity of spec sets,
+# duration is closeness to the target kill time.
+weight_healer_comp = 0.7
+weight_duration = 0.3
+# Target kill duration in seconds. Leave at 0 to use the median of the candidate kills.
+target_duration = 0
+# Only consider kills from these regions (empty = all). e.g. ["EU"]
+regions = []
+
+[analysis]
+# A cooldown cluster must appear in at least this fraction of analysed kills to be reported.
+min_support = 0.3
+# Casts closer than this (seconds) are considered "the same" usage across kills.
+cluster_gap = 15
+# If true, also list long-cooldown abilities the tool found in the data that are not in cooldowns.toml
+discover_unlisted = true
+# Team plan: a cooldown kind the kill healers used on a mechanic in at least this share of kills is
+# allowed there, ahead of what bosses/<boss>.toml says. Lower = trust the logs more.
+evidence_threshold = 0.25
+
+[output]
+dir = "out"
+# Player names to put on the raid note lines. Left empty = use names from your own logs.
+# [output.names]
+# "Restoration Druid" = "Chubbycake"
