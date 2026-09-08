@@ -129,7 +129,9 @@ let picks={}; try{ picks=JSON.parse(localStorage.getItem('nsrtPicks')||'{}'); }c
 function savePicks(){ try{ localStorage.setItem('nsrtPicks', JSON.stringify(picks)); }catch(e){} }
 const TIER_ORDER={major:0,minor:1,discovered:2};
 function specAbilities(b, spec){ const m=new Map(); b.clusters.filter(c=>c.spec===spec).forEach(c=>{ if(!m.has(c.ability)) m.set(c.ability,{tier:c.tier,id:c.ability_id}); }); return [...m.entries()].sort((x,y)=>(TIER_ORDER[x[1].tier]-TIER_ORDER[y[1].tier])||x[0].localeCompare(y[0])); }
-function picked(spec, ability, tier){ const p=picks[spec]||{}; return ability in p ? p[ability] : tier==='major'; }
+function picked(spec, ability, tier, dflt){ const p=picks[spec]||{}; return ability in p ? p[ability] : (dflt!==undefined ? dflt : tier==='major'); }
+// abilities the team plan assigns to this healer, so the tick row can list them in plan mode
+function planAbilities(b, h){ const m=new Map(); planFor(b,h.name).forEach(a=>{ if(!m.has(a.ability)) m.set(a.ability,{tier:'planned',id:a.ability_id}); }); return [...m.entries()]; }
 function select(i){ curBoss=DATA.bosses[i].name; curDiff=(DATA.bosses[i].difficulty||'').toLowerCase(); selectCurrent(); }
 function rerender(){ render(DATA.bosses[cur]); }
 
@@ -201,7 +203,7 @@ function planB(b,h){
 function buildNsrtPlan(b,h){
   const diff=(b.difficulty||DATA.difficulty||'heroic'); const D=diff.charAt(0).toUpperCase()+diff.slice(1).toLowerCase();
   const out=[`EncounterID:${b.encounter_id};Difficulty:${D};Name:${b.name};`];
-  planFor(b,h.name).forEach(a=>{ const o=b.mechanics[a.occ]; const ph=(b.use_phases&&o.phase!=null)?o.phase:1; const t=(b.use_phases&&o.phase!=null)?o.t:o.abs_t;
+  planFor(b,h.name).filter(a=>picked(h.spec,a.ability,'planned',true)).forEach(a=>{ const o=b.mechanics[a.occ]; const ph=(b.use_phases&&o.phase!=null)?o.phase:1; const t=(b.use_phases&&o.phase!=null)?o.t:o.abs_t;
     out.push(`ph:${ph};time:${t.toFixed(1)};tag:${h.name};spellid:${a.ability_id};`); });
   return out.join('\n');
 }
@@ -262,7 +264,7 @@ function render(b){
       mh.distribution.map(d=>`<div class="tile"><div class="v">${d.healers}</div><div class="l">healers · ${d.kills} kills · median kill ${fmt(d.median_kill)} · fastest ${fmt(d.fastest)}</div></div>`).join('')+`</div>
       <p class="muted" style="margin:8px 0 0">Mythic is fixed at 20 players so this is a real choice there. Heroic flexes 10 to 30 and is not shown. Only appears when there are enough Mythic kills to say anything.</p>`;
     main.appendChild(hc); }
-  if(show('plan') && !(b.mechanics||[]).length){ const tp=document.createElement('div'); tp.className='card'; tp.innerHTML='<h2>Team plan</h2><p class="muted">No boss cast data in this run yet. Run the tool again (RUN ME.bat) and the mechanic-by-mechanic plan appears here. The Timeline tab has the consensus notes in the meantime.</p>'; main.appendChild(tp); }
+  if(show('plan') && !(b.mechanics||[]).length){ const tp=document.createElement('div'); tp.className='card'; tp.innerHTML='<h2>Team plan</h2><p class="muted">This run had no boss cast data for this boss, so there is no mechanic-by-mechanic plan yet. The next full run builds it from the boss\'s own casts in the kill logs. The Timeline tab has the consensus notes in the meantime.</p>'; main.appendChild(tp); }
   if(show('plan') && (b.mechanics||[]).length){ const tp=document.createElement('div'); tp.className='card'; tp.innerHTML=teamPlan(b,col); main.appendChild(tp);
     tp.querySelectorAll('button.copy').forEach(btn=>btn.onclick=()=>{navigator.clipboard.writeText(btn.dataset.text).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1200);});}); }
 
@@ -296,7 +298,7 @@ function render(b){
   ns.innerHTML=`<h2>Personal NSRT note</h2>
     <div class="filterbar" style="margin-bottom:8px">${b.ours.healers.map(x=>`<button class="chip nchip" data-v="${esc(x.name)}" aria-pressed="${x.name===h.name}">${esc(x.name)}</button>`).join('')}
     </div>
-    ${h && nsrtSource!=='plan' ? `<div class="picks">${specAbilities(b,h.spec).map(([a,m])=>`<label class="pick"><input type="checkbox" data-a="${esc(a)}" ${picked(h.spec,a,m.tier)?'checked':''}> ${esc(a)} <span class="muted">${m.tier==='discovered'?'seen in logs':m.tier}</span></label>`).join('')}
+    ${h ? `<div class="picks">${(nsrtSource==='plan'&&(b.mechanics||[]).length ? planAbilities(b,h) : specAbilities(b,h.spec)).map(([a,m])=>`<label class="pick"><input type="checkbox" data-a="${esc(a)}" ${picked(h.spec,a,m.tier,m.tier==='planned'?true:undefined)?'checked':''}> ${esc(a)} <span class="muted">${m.tier==='discovered'?'seen in logs':m.tier==='planned'?'in plan':m.tier}</span></label>`).join('')}
       <button class="chip small" id="pickMajors">majors only</button><button class="chip small" id="pickAll">all</button></div>` : ''}
     ${(b.mechanics||[]).length?`<div class="filterbar" style="margin-bottom:8px"><span class="muted">Source:</span><button class="chip small src" data-v="plan" aria-pressed="${nsrtSource==='plan'}">team plan (by mechanic)</button><button class="chip small src" data-v="consensus" aria-pressed="${nsrtSource==='consensus'}">consensus (copy the kills)</button></div>`:''}
     ${b.use_phases?'':'<p class="muted" style="margin:0 0 8px">No phase data for this boss, so everything is under ph:1 with time from pull.</p>'}` +
@@ -308,7 +310,7 @@ function render(b){
   if(h && ns.querySelector('#pickMajors')){
     ns.querySelectorAll('.pick input').forEach(cb=>cb.onchange=()=>{ (picks[h.spec]=picks[h.spec]||{})[cb.dataset.a]=cb.checked; savePicks(); rerender(); });
     ns.querySelector('#pickMajors').onclick=()=>{ picks[h.spec]={}; savePicks(); rerender(); };
-    ns.querySelector('#pickAll').onclick=()=>{ picks[h.spec]={}; specAbilities(b,h.spec).forEach(([a])=>picks[h.spec][a]=true); savePicks(); rerender(); };
+    ns.querySelector('#pickAll').onclick=()=>{ picks[h.spec]={}; specAbilities(b,h.spec).forEach(([a])=>picks[h.spec][a]=true); planAbilities(b,h).forEach(([a])=>picks[h.spec][a]=true); savePicks(); rerender(); };
   }
 
   // ---- our pulls vs plan

@@ -99,8 +99,9 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
                       gap: float, min_support: float, use_phases: bool,
                       discover_unlisted: bool = True) -> list[CDCluster]:
     """Group each (spec, ability) cast across kills into recurring timings."""
+    ignore = {n.lower() for n in (cooldowns.get("discovery") or {}).get("ignore", []) if isinstance(n, str)}
     listed: dict[str, dict[str, dict]] = {
-        spec: {c["name"].lower(): c for c in cds} for spec, cds in cooldowns.items()
+        spec: {c["name"].lower(): c for c in cds} for spec, cds in cooldowns.items() if isinstance(cds, list)
     }
     # (spec, ability) -> list of (time, kill code, abs time, player)
     buckets: dict[tuple[str, str, int | None], list] = defaultdict(list)
@@ -112,8 +113,9 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
         for spec in set(h.spec_key for h in k.healers):
             kills_with_spec[spec] += 1
 
-    # for discovery: casts per kill per (spec, ability)
+    # for discovery: casts per kill per (spec, ability), and spacing between a player's casts
     per_kill_counts: dict[tuple[str, str], list[int]] = defaultdict(list)
+    gaps: dict[tuple[str, str], list[float]] = defaultdict(list)
 
     for k in kills:
         counts: Counter = Counter()
@@ -121,7 +123,15 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
             counts[(c.spec_key, c.ability)] += 1
         for key, n in counts.items():
             per_kill_counts[key].append(n)
+        last_by: dict[tuple[str, str, str], float] = {}
+        for c in sorted(k.casts, key=lambda c: c.t):
+            lk = (c.spec_key, c.player, c.ability)
+            if lk in last_by:
+                gaps[(c.spec_key, c.ability)].append(c.t - last_by[lk])
+            last_by[lk] = c.t
         for c in k.casts:
+            if c.ability.lower() in ignore:
+                continue
             cfg = listed.get(c.spec_key, {}).get(c.ability.lower())
             if cfg is None:
                 # match on id as a fallback (renamed spell)
@@ -151,7 +161,11 @@ def cluster_cooldowns(kills: list[Kill], cooldowns: dict[str, list[dict]],
         if tier != "discovered":
             return True
         cnts = per_kill_counts.get(key, [])
-        return bool(cnts) and statistics.mean(cnts) <= 4 and len(cnts) >= 0.5 * kills_with_spec.get(key[0], n_kills)
+        if not cnts or statistics.mean(cnts) > 4 or len(cnts) < 0.5 * kills_with_spec.get(key[0], n_kills):
+            return False
+        # a real cooldown is re-cast on a cooldown-like rhythm; rotational filler is not
+        g = gaps.get(key, [])
+        return not g or statistics.median(g) >= 45
 
     out: list[CDCluster] = []
     for (spec, ability, phase), pts in buckets.items():

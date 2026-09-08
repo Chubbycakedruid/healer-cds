@@ -136,7 +136,7 @@ def test_planner_end_to_end():
     by = {}
     for a in plan["assignments"]:
         by.setdefault((a["healer"], a["ability"]), []).append(occ[a["occ"]]["abs_t"])
-    cd = {(s, c["name"]): c["cd"] for s, l in COOLDOWNS.items() for c in l}
+    cd = {(s, c["name"]): c["cd"] for s, l in COOLDOWNS.items() if isinstance(l, list) for c in l}
     for (h, ab), ts in by.items():
         spec = next(x.spec_key for x in ours.healers if x.name == h)
         ts.sort()

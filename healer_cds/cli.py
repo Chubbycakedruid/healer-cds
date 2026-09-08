@@ -70,7 +70,7 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
     seen_specs = {sp for sp, _ in owned}
     owned |= {(c.spec_key, c.ability) for k in kills for c in k.casts if c.spec_key not in seen_specs}
     team_plan = planner.plan_team(occurrences, evidence, ours, cooldowns, canon, owned=owned)
-    listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() for c in lst}
+    listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() if isinstance(lst, list) for c in lst}
     pulls_out = []
     for pl in our_pulls or []:
         keep = [c for c in pl["casts"] if (c["spec"], c["ability"].lower()) in listed_names]
@@ -172,7 +172,7 @@ def refresh_pulls_only(cfg: dict, cooldowns: dict, verbose: bool) -> list[dict]:
     client = _client(cfg, verbose)
     g = cfg["guild"]
     zone = pipeline.resolve_zone(client, g["raid"])
-    listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() for c in lst}
+    listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() if isinstance(lst, list) for c in lst}
     for r in data["bosses"]:
         enc = pipeline.resolve_encounter(zone, r["name"])
         diff = DIFFICULTY[r["difficulty"].lower()]
@@ -309,6 +309,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--demo", action="store_true", help="use synthetic data, no API calls")
     p.add_argument("--pulls-only", action="store_true",
                    help="fast mid-raid refresh: re-read only our recent pulls, keep the last full analysis")
+    p.add_argument("--render-only", action="store_true",
+                   help="rebuild the dashboard from the last saved analysis with the current code, no API calls")
     p.add_argument("--healers", action="append",
                    help='pin the healer lineup, e.g. --healers "Chubbycake:Restoration Druid" (repeatable)')
     p.add_argument("-v", "--verbose", action="store_true")
@@ -328,7 +330,13 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = ROOT / cfg["output"].get("dir", "out")
     out_dir.mkdir(parents=True, exist_ok=True)
     try:
-        if args.pulls_only:
+        if args.render_only:
+            path = out_dir / "analysis.json"
+            if not path.exists():
+                sys.exit("No saved analysis (out/analysis.json). Run a full analysis first.")
+            data = json.loads(path.read_text(encoding="utf-8"))
+            results = data["bosses"]
+        elif args.pulls_only:
             data = refresh_pulls_only(cfg, cooldowns, args.verbose)
             results = data["bosses"]
         else:
@@ -343,6 +351,9 @@ def main(argv: list[str] | None = None) -> int:
     (out_dir / "analysis.json").write_text(json.dumps(data), encoding="utf-8")
     write_dashboard(data, out_dir / "dashboard.html")
     (out_dir / "index.html").write_text('<meta http-equiv="refresh" content="0; url=dashboard.html">', encoding="utf-8")
+    if args.render_only:
+        print(f"Dashboard re-rendered from the saved analysis: {out_dir / 'dashboard.html'}")
+        return 0
     if args.pulls_only:
         print(f"\nPulls refreshed. Dashboard: {out_dir / 'dashboard.html'}")
         return 0

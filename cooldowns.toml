@@ -8,6 +8,21 @@
 #   dr = raid-wide damage reduction or equalising | external = single target save
 #   personal = only saves the caster | mana | utility. Only throughput/sustained/dr/external get planned.
 # If Blizzard renames or re-IDs something, fix the name here or let discover_unlisted find it.
+#
+# Abilities discovery must never treat as cooldowns (rotational spells, consumables, utility).
+[discovery]
+ignore = [
+  "Moonfire", "Sunfire", "Wrath", "Starfire", "Starsurge", "Regrowth", "Rejuvenation", "Wild Growth", "Swiftmend",
+  "Lifebloom", "Efflorescence", "Nature's Cure", "Stampeding Roar", "Ursol's Vortex", "Typhoon", "Wild Charge",
+  "Smite", "Holy Fire", "Penance", "Power Word: Shield", "Power Word: Radiance", "Holy Word: Chastise", "Desperate Prayer",
+  "Holy Shock", "Holy Light", "Flash of Light", "Judgment", "Crusader Strike", "Consecration",
+  "Renewing Mist", "Vivify", "Enveloping Mist", "Rising Sun Kick", "Detox", "Ring of Peace", "Transcendence", "Roll",
+  "Riptide", "Healing Surge", "Chain Heal", "Healing Wave", "Lightning Bolt", "Chain Lightning", "Gust of Wind",
+  "Poison Cleansing Totem", "Purify Spirit", "Wind Shear",
+  "Living Flame", "Dream Breath", "Spiritbloom", "Echo", "Verdant Embrace", "Obsidian Scales", "Tip the Scales",
+  "Stasis (Release)", "Hover", "Cauterizing Flame", "Naturalize",
+  "Lightfused Mana Potion", "Concentrated Silvermoon Health Potion", "Healthstone", "Soulcoiler Ritual Vessel",
+]
 
 [["Restoration Druid"]]
 name = "Tranquility"

@@ -30,7 +30,7 @@ def make_demo(boss: str, cooldowns: dict[str, list[dict]], seed: int = 7) -> tup
                             "Invoke Chi-Ji, the Red Crane": [(1, 10), (2, 42), (3, 40)]},
         "Restoration Shaman": {"Spirit Link Totem": [(2, 8)], "Healing Tide Totem": [(1, 70), (3, 50)]},
     }
-    ids = {c["name"]: c["ids"][0] for cds in cooldowns.values() for c in cds if c.get("ids")}
+    ids = {c["name"]: c["ids"][0] for cds in cooldowns.values() if isinstance(cds, list) for c in cds if c.get("ids")}
     kills: list[Kill] = []
     for i, g in enumerate(GUILDS):
         dur = base_dur * rng.uniform(0.88, 1.15)

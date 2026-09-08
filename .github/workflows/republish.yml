@@ -1,0 +1,52 @@
+name: Republish dashboard (no data refresh)
+
+# Re-renders the page from the last saved analysis with the current code. No Warcraft Logs calls.
+# Runs on its own whenever the dashboard code changes, or press "Run workflow".
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "healer_cds/dashboard.py"
+      - "healer_cds/notes.py"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Restore last full analysis
+        uses: actions/cache/restore@v4
+        with:
+          path: out/analysis.json
+          key: analysis-never-matches
+          restore-keys: analysis-
+      - name: Render
+        run: |
+          cp config.actions.toml config.toml
+          python run.py --render-only
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+  deploy:
+    needs: render
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

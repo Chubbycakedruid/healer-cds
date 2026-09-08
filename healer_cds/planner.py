@@ -136,7 +136,7 @@ def cooldown_evidence(kills: list[Kill], occurrences: list[dict], our_specs: lis
     Kinds and stacking depth count every healer in the kill (a paladin's Aura Mastery is still 'one DR');
     ability-level evidence counts only specs we have, since that is all we can copy.
     """
-    kind_of = {(spec, c["name"].lower()): c.get("kind", "throughput") for spec, lst in cooldowns.items() for c in lst}
+    kind_of = {(spec, c["name"].lower()): c.get("kind", "throughput") for spec, lst in cooldowns.items() if isinstance(lst, list) for c in lst}
     out = []
     for o in occurrences:
         by_ability: Counter = Counter()
@@ -217,7 +217,7 @@ def plan_team(occurrences: list[dict], evidence: list[dict], ours: OurComp,
     # cooldown instances owned by our healers
     inst = []
     for h in ours.healers:
-        for c in cooldowns.get(h.spec_key, []):
+        for c in (cooldowns.get(h.spec_key) or []):
             kind = c.get("kind", "throughput")
             if kind not in PLANNABLE:
                 continue
