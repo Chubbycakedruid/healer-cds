@@ -111,7 +111,7 @@ def test_mechanic_attribution_and_exemplar():
     curve = analysis.average_damage_curve(kills)
     peaks = analysis.damage_peaks(curve)
     mech, peak_names = analysis.attribute_mechanics(kills, cl, peaks)
-    assert mech and all(m in ("Fangs of the Crucible", "Eternal Nightfall", "Defilement of the Crucible", "Toxic Deluge", "Gloombomb", "Grim Guillotine") for m in mech.values())
+    assert mech and all(m in ("Fangs of the Coiled Altar", "Eternal Nightfall", "Defilement of the Coiled Altar", "Toxic Deluge", "Gloombomb", "Grim Guillotine") for m in mech.values())
     assert any(peak_names)
     ex = analysis.exemplar_sequences(kills, cl, ours.healer_specs)
     assert "Restoration Druid" in ex and ex["Restoration Druid"]["casts"]
@@ -126,7 +126,7 @@ def test_planner_end_to_end():
     assert boss and boss["_file"] == "the-coiled-altar.toml"
     occ, unlisted = planner.mechanic_timeline(kills, boss, True)
     names = {o["mechanic"] for o in occ}
-    assert "Fangs of the Crucible" in names and "Defilement of the Crucible" in names
+    assert "Fangs of the Coiled Altar" in names and "Defilement of the Coiled Altar" in names
     ev = planner.cooldown_evidence(kills, occ, ours.healer_specs, COOLDOWNS)
     assert len(ev) == len(occ)
     planner.apply_evidence(occ, ev)

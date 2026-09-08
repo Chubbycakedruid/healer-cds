@@ -66,9 +66,9 @@ def make_demo(boss: str, cooldowns: dict[str, list[dict]], seed: int = 7) -> tup
                 c.phase, c.t_in_phase = k.phase_of(t)
                 k.casts.append(c)
         # damage curve: baseline + spikes near CD timings, with a named boss ability per spike
-        mech_by_phase = {1: {20: "Fangs of the Crucible", 70: "Fangs of the Crucible", 45: "Toxic Deluge"},
+        mech_by_phase = {1: {20: "Fangs of the Coiled Altar", 70: "Fangs of the Coiled Altar", 45: "Toxic Deluge"},
                          2: {20: "Eternal Nightfall", 70: "Eternal Nightfall", 45: "Gloombomb"},
-                         3: {20: "Defilement of the Crucible", 70: "Defilement of the Crucible", 45: "Grim Guillotine"}}
+                         3: {20: "Defilement of the Coiled Altar", 70: "Defilement of the Coiled Altar", 45: "Grim Guillotine"}}
         for pid, s in phases:
             for off, mname in mech_by_phase.get(pid, {}).items():
                 k.boss_casts.append((mname, round(s + off * scale + rng.gauss(0, 1.5), 1)))

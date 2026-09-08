@@ -145,3 +145,45 @@ school = "Nature"
 cover = ["sustained"]
 weight = 2
 notes = "Egg hatch on venom contact: raid-wide Nature DoT 10s. Happens when eggs are mishandled."
+
+[[mechanic]]
+name = "Serpent's Bite"
+phase = 0
+type = "targeted"
+school = "Nature"
+cover = ["external", "throughput"]
+weight = 1
+notes = "Targeted fangs with a Nature DoT (Surging Fang) or petrification. Journal says Mythic only but it appears in Heroic logs."
+
+[[mechanic]]
+name = "Malice"
+phase = 0
+type = "burst"
+school = "Shadow"
+cover = []
+weight = 1
+notes = "Seen in every kill log, not in the journal text. Cover and priority come from what the kill healers did."
+
+[[mechanic]]
+name = "Submerge"
+phase = 0
+type = "control"
+cover = ["none"]
+weight = 0
+notes = "Phase transition cast."
+
+[[mechanic]]
+name = "Shadow Molt"
+phase = 0
+type = "control"
+cover = ["none"]
+weight = 0
+notes = "Transition/visual cast seen in logs."
+
+[[mechanic]]
+name = "Writhing Gestation"
+phase = 0
+type = "control"
+cover = ["none"]
+weight = 0
+notes = "Egg gestation timer; a DPS priority, not a healing event."

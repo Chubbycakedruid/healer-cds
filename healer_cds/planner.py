@@ -75,6 +75,16 @@ def mechanic_timeline(kills: list[Kill], boss: dict | None, use_phases: bool,
             if match and total > 0:
                 mechanics.append({"name": match, "type": "burst", "school": "", "cover": [], "weight": 2,
                                   "notes": "From the logs only (no mechanic file): timing from the boss's casts, cover from what the kill healers used."})
+        if not mechanics:
+            # damage names did not line up with cast names: fall back to the boss's most regular casts
+            freq: Counter = Counter()
+            for k in kills_with:
+                for name in {n for n, _ in k.boss_casts}:
+                    freq[name] += 1
+            for name, cnt in freq.most_common(8):
+                if cnt >= 0.5 * n:
+                    mechanics.append({"name": name, "type": "burst", "school": "", "cover": [], "weight": 1,
+                                      "notes": "From the logs only: a regular boss cast. Priority and cover come from what the kill healers did around it."})
     buckets: dict[tuple[str, int | None], list] = defaultdict(list)
     unlisted: Counter = Counter()
     for k in kills_with:

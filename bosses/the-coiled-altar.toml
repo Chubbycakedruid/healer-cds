@@ -8,13 +8,13 @@
 npcs = ["Zul'jan", "Malacrass", "Spiteful Soulcoiler", "Zul'jan the Twinfang", "Malacrass the Usurper"]
 
 [[mechanic]]
-name = "Fangs of the Crucible"
+name = "Fangs of the Coiled Altar"
 phase = 1
 type = "burst"
 school = "Nature"
 cover = ["dr", "throughput"]
 weight = 3
-notes = "Raid-wide Nature hit, boss gains Twinfang Toxin stacks. Main P1 healing moment."
+notes = "Raid-wide Nature hit, boss gains Twinfang Toxin stacks. Main P1 healing moment. (Journal calls it Fangs of the Crucible; the log name is used here.)"
 
 [[mechanic]]
 name = "Toxic Deluge"
@@ -107,7 +107,7 @@ weight = 2
 notes = "Heroic+: marked players explode after 5s within 15 yards, Gravebound on hit."
 
 [[mechanic]]
-name = "Defilement of the Crucible"
+name = "Defilement of the Coiled Altar"
 phase = 3
 type = "absorb"
 school = "Shadow"
@@ -132,3 +132,30 @@ school = "Shadow"
 cover = ["none"]
 weight = 0
 notes = "Kill both bosses together or the survivor berserks (+500% every 5s)."
+
+[[mechanic]]
+name = "Noxious Ground"
+phase = 0
+type = "pool"
+school = "Nature"
+cover = ["sustained"]
+weight = 1
+notes = "Ground poison seen in every kill log. Mostly avoidable; sustained healing if people have to stand in it."
+
+[[mechanic]]
+name = "Axegrinder"
+phase = 0
+type = "targeted"
+school = "Physical"
+cover = ["external", "throughput"]
+weight = 1
+notes = "Thrown axes, Physical on impact, remain on the ground. Journal says Mythic only but it appears in Heroic logs too."
+
+[[mechanic]]
+name = "Ghastly Regeneration"
+phase = 0
+type = "control"
+school = ""
+cover = ["none"]
+weight = 0
+notes = "Boss self-heal seen in the logs. A DPS/interrupt problem, not a healing one."
