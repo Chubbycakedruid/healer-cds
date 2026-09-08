@@ -48,19 +48,6 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
                            and c.support_pct >= a["min_support"] - 1e-9]
     discovered = sorted({f"{c.spec_key}: {c.ability} (#{c.ability_id}) around {fmt_time(c.abs_median)}"
                          for c in clusters if c.tier == "discovered"})
-    curve = analysis.average_damage_curve(kills)
-    peaks = analysis.damage_peaks(curve)
-    mech_by_cluster, peak_mechs = analysis.attribute_mechanics(kills, clusters, peaks)
-    # canonical ids for exemplar casts: map (spec, ability) -> id used by the clusters
-    canon = {(c.spec_key, c.ability): c.ability_id for c in clusters}
-    exemplars = analysis.exemplar_sequences(kills, clusters, list(our_specs))
-    for spec, ex in exemplars.items():
-        for c in ex["casts"]:
-            c["ability_id"] = canon.get((spec, c["ability"]), c["ability_id"])
-    boss_file = planner.load_boss_file(name)
-    occurrences, unlisted_boss = planner.mechanic_timeline(kills, boss_file, use_phases, min_support=a["min_support"])
-    evidence = planner.cooldown_evidence(kills, occurrences, list(our_specs), cooldowns)
-    planner.apply_evidence(occurrences, evidence, kind_threshold=a.get("evidence_threshold", 0.25))
     # what our healers actually have: abilities seen in our own pulls, else anything the kills' healers cast
     owned: set[tuple[str, str]] = set()
     for pl in our_pulls or []:
@@ -69,7 +56,43 @@ def analyse_boss(name: str, ours: OurComp, kills: list[Kill], cfg: dict, cooldow
     # any spec our pulls did not show us falls back to what that spec cast in the kills
     seen_specs = {sp for sp, _ in owned}
     owned |= {(c.spec_key, c.ability) for k in kills for c in k.casts if c.spec_key not in seen_specs}
+    # talent-choice groups (Revival vs Restoral, Yu'lon vs Chi-Ji, Wrath vs Crusader): a healer only has one,
+    # so keep the one our healer is seen casting, else the one the kills used most, and drop the rest
+    groups: dict[tuple[str, str], list[str]] = {}
+    for spec, lst in cooldowns.items():
+        if isinstance(lst, list):
+            for c in lst:
+                if c.get("exclusive"):
+                    groups.setdefault((spec, c["exclusive"]), []).append(c["name"])
+    drop: set[tuple[str, str]] = set()
+    our_pull_specs = {c["spec"] for pl in our_pulls or [] for c in pl["casts"]}
+    for (spec, _), names in groups.items():
+        if spec not in our_specs or len(names) < 2:
+            continue
+        mine = [n for n in names if (spec, n) in owned] if spec in our_pull_specs else []
+        if len(mine) == 1:
+            keep = mine[0]
+        else:
+            keep = max(names, key=lambda n: sum(c.support for c in clusters if c.spec_key == spec and c.ability == n))
+        drop |= {(spec, n) for n in names if n != keep}
+    clusters = [c for c in clusters if (c.spec_key, c.ability) not in drop]
+    listed_and_relevant = [c for c in listed_and_relevant if (c.spec_key, c.ability) not in drop]
+    curve = analysis.average_damage_curve(kills)
+    peaks = analysis.damage_peaks(curve)
+    mech_by_cluster, peak_mechs = analysis.attribute_mechanics(kills, clusters, peaks)
+    # canonical ids for exemplar casts: map (spec, ability) -> id used by the clusters
+    canon = {(c.spec_key, c.ability): c.ability_id for c in clusters}
+    exemplars = analysis.exemplar_sequences(kills, clusters, list(our_specs))
+    for spec, ex in exemplars.items():
+        ex["casts"] = [c for c in ex["casts"] if (spec, c["ability"]) not in drop]
+        for c in ex["casts"]:
+            c["ability_id"] = canon.get((spec, c["ability"]), c["ability_id"])
+    boss_file = planner.load_boss_file(name)
+    occurrences, unlisted_boss = planner.mechanic_timeline(kills, boss_file, use_phases, min_support=a["min_support"])
+    evidence = planner.cooldown_evidence(kills, occurrences, list(our_specs), cooldowns)
+    planner.apply_evidence(occurrences, evidence, kind_threshold=a.get("evidence_threshold", 0.25))
     cd_seen = {(c.spec_key, c.ability): c.cd for c in clusters}
+    owned -= drop
     team_plan = planner.plan_team(occurrences, evidence, ours, cooldowns, canon, owned=owned, cd_seen=cd_seen)
     listed_names = {(spec, c["name"].lower()) for spec, lst in cooldowns.items() if isinstance(lst, list) for c in lst}
     pulls_out = []

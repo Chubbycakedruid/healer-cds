@@ -7,6 +7,8 @@
 #   throughput = big burst of healing | sustained = healing over 10s+ (HoTs, forms, celestials)
 #   dr = raid-wide damage reduction or equalising | external = single target save
 #   personal = only saves the caster | mana | utility. Only throughput/sustained/dr/external get planned.
+# exclusive = a talent-choice group (Revival vs Restoral): a healer can only have one of them, so the
+#   notes and plan keep whichever one our healer is seen casting (else the one the kills used most).
 # If Blizzard renames or re-IDs something, fix the name here or let discover_unlisted find it.
 #
 # Abilities discovery must never treat as cooldowns (rotational spells, consumables, utility).
@@ -143,6 +145,7 @@ kind = "dr"
 
 [["Holy Paladin"]]
 name = "Avenging Wrath"
+exclusive = "paladin-wings"
 cd = 120
 ids = [31884]
 tier = "major"
@@ -150,6 +153,7 @@ kind = "throughput"
 
 [["Holy Paladin"]]
 name = "Avenging Crusader"
+exclusive = "paladin-wings"
 cd = 60
 ids = [216331]
 tier = "major"
@@ -171,6 +175,7 @@ kind = "external"
 
 [["Mistweaver Monk"]]
 name = "Revival"
+exclusive = "monk-mass-heal"
 cd = 180
 ids = [115310]
 tier = "major"
@@ -178,6 +183,7 @@ kind = "throughput"
 
 [["Mistweaver Monk"]]
 name = "Restoral"
+exclusive = "monk-mass-heal"
 cd = 180
 ids = [388615]
 tier = "major"
@@ -185,6 +191,7 @@ kind = "throughput"
 
 [["Mistweaver Monk"]]
 name = "Invoke Yu'lon, the Jade Serpent"
+exclusive = "monk-celestial"
 cd = 120
 ids = [322118]
 tier = "major"
@@ -192,6 +199,7 @@ kind = "sustained"
 
 [["Mistweaver Monk"]]
 name = "Invoke Chi-Ji, the Red Crane"
+exclusive = "monk-celestial"
 cd = 120
 ids = [325197]
 tier = "major"
